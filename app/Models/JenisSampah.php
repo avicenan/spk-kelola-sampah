@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class JenisSampah extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    protected $table = 'jenis_sampah';
+    protected $fillable = [
+        'nama',
+        'sumber_sampah',
+        'is_active'
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean'
+    ];
+
+    public function tpa()
+    {
+        return $this->belongsToMany(TPA::class, 'tpa_jenis_sampah', 'jenis_sampah_id', 'tpa_id')
+            ->withPivot('is_active')
+            ->withTimestamps();
+    }
+}
