@@ -47,7 +47,7 @@ class JenisSampahController extends Controller
 
     public function show(JenisSampah $jenisSampah)
     {
-        // return view('jenis-sampah.show', compact('jenisSampah'));
+        return response()->json($jenisSampah);
     }
 
     public function edit(JenisSampah $jenisSampah)

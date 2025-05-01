@@ -61,7 +61,7 @@ class TPAController extends Controller
 
     public function show(TPA $tpa)
     {
-        // return view('tpa.show', compact('tpa'));
+        return response()->json($tpa);
     }
 
     public function edit(TPA $tpa)

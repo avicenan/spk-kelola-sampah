@@ -7,7 +7,7 @@
 @php
     $heads = [
         ['label' => 'No', 'width' => 4],
-        'Nama',
+        'Label',
         'Sifat',
         'Bobot',
         ['label' => 'Actions', 'no-export' => true, 'width' => 5],
@@ -119,13 +119,13 @@
                                 <nobr>
                                     <button class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit"
                                         data-toggle="modal" data-target="#editKriteria"
-                                        onclick="$('#editKriteriaForm').attr('action', '/kriteria/{{ $item[0] }}'); $('#editKriteriaNama').val('{{ $item[1] }}'); $('#editKriteriaSifat').val('{{ $item[2] }}'); $('#editKriteriaBobot').val('{{ $item[3] }}')">
+                                        onclick="$('#editKriteriaForm').attr('action', '/kriteria/{{ $item[0] }}'); $('#editKriteriaLabel').val('{{ $item[1] }}'); $('#editKriteriaSifat').val('{{ $item[2] }}'); $('#editKriteriaBobot').val('{{ $item[3] }}')">
                                         <i class="fa fa-lg fa-fw fa-pen"></i>
                                     </button>
 
                                     <button class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete"
                                         data-toggle="modal" data-target="#deleteKriteria"
-                                        onclick="$('#deleteKriteriaForm').attr('action', '/kriteria/{{ $item[0] }}'); $('#deleteKriteriaNama').text('{{ $item[0] }}');">
+                                        onclick="$('#deleteKriteriaForm').attr('action', '/kriteria/{{ $item[0] }}'); $('#deleteKriteriaLabel').text('{{ $item[0] }}');">
                                         <i class="fa fa-lg fa-fw fa-trash"></i>
                                     </button>
                                 </nobr>
@@ -141,8 +141,8 @@
             <form action="{{ route('kriteria.store') }}" id="createKriteriaForm" method="POST">
                 @csrf
                 <div class="form-group">
-                    <label for="nama">Nama</label>
-                    <input type="text" class="form-control" id="nama" name="nama">
+                    <label for="label">Nama</label>
+                    <input type="text" class="form-control" id="label" name="label">
                 </div>
                 <div class="form-group">
                     <label for="sifat">Sifat</label>
@@ -170,8 +170,8 @@
                 @csrf
                 @method('PUT')
                 <div class="form-group">
-                    <label for="nama">Nama</label>
-                    <input type="text" class="form-control" id="editKriteriaNama" name="nama">
+                    <label for="editKriteriaLabel">Nama</label>
+                    <input type="text" class="form-control" id="editKriteriaLabel" name="label">
                 </div>
                 <div class="form-group">
                     <label for="sifat">Sifat</label>
@@ -195,7 +195,7 @@
         {{-- Delete Kriteria --}}
         <x-adminlte-modal id="deleteKriteria" title="Hapus Kriteria" theme="danger" icon="fa fa-trash" v-centered>
             <p>Apakah Anda yakin ingin menghapus kriteria ini?</p>
-            <p class="font-weight-bold" id="deleteKriteriaNama"></p>
+            <p class="font-weight-bold" id="deleteKriteriaLabel"></p>
             <form action="" id="deleteKriteriaForm" method="POST">
                 @csrf
                 @method('DELETE')

@@ -41,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Keputusan
     Route::resource('keputusan', KeputusanController::class);
+    Route::post('/keputusan/calculate', [KeputusanController::class, 'calculate'])->name('keputusan.calculate');
 
     // Aktifitas
     Route::resource('aktifitas', AktifitasController::class);

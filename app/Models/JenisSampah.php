@@ -20,7 +20,7 @@ class JenisSampah extends Model
         'is_active' => 'boolean'
     ];
 
-    public function tpa()
+    public function tpas()
     {
         return $this->belongsToMany(TPA::class, 'tpa_jenis_sampah', 'jenis_sampah_id', 'tpa_id')
             ->withPivot('is_active')

@@ -14,7 +14,7 @@ class KriteriaController extends Controller
 
     public function index()
     {
-        $kriterias = Kriteria::orderBy('id', 'asc')->get(['id', 'nama', 'sifat', 'bobot']);
+        $kriterias = Kriteria::orderBy('id', 'asc')->get(['id', 'label', 'sifat', 'bobot']);
         return view('kriteria.index', compact('kriterias'));
     }
 
@@ -26,13 +26,14 @@ class KriteriaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama' => 'required|string|max:255',
+            'label' => 'required|string|max:255',
             'sifat' => 'required|string|max:255',
             'bobot' => 'required|numeric|min:0|max:1',
         ]);
         try {
             Kriteria::create([
-                'nama' => $request->nama,
+                'nama' => strtolower(str_replace(' ', '_', $request->label)),
+                'label' => $request->label,
                 'sifat' => $request->sifat,
                 'bobot' => $request->bobot,
             ]);
@@ -55,13 +56,16 @@ class KriteriaController extends Controller
     public function update(Request $request, Kriteria $kriterium)
     {
         $request->validate([
-            'nama' => 'required|string|max:255',
+            'label' => 'required|string|max:255',
             'sifat' => 'required|string|max:255',
             'bobot' => 'required|numeric|min:0|max:1',
         ]);
         try {
             $kriterium->update([
-                'nama' => $request->nama,
+                'nama' => strtolower(
+                    str_replace(' ', '_', $request->label)
+                ),
+                'label' => $request->label,
                 'sifat' => $request->sifat,
                 'bobot' => $request->bobot,
             ]);
