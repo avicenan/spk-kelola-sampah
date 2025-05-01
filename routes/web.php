@@ -7,6 +7,7 @@ use App\Http\Controllers\JenisSampahController;
 use App\Http\Controllers\TPAController;
 use App\Http\Controllers\KeputusanController;
 use App\Http\Controllers\AktifitasController;
+use App\Http\Controllers\KriteriaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,4 +44,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Aktifitas
     Route::resource('aktifitas', AktifitasController::class);
+
+    // Kriteria
+    Route::resource('kriteria', KriteriaController::class);
 });

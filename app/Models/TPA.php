@@ -15,9 +15,7 @@ class TPA extends Model
         'nama',
         'alamat',
         'jarak',
-        'biaya',
-        'skala_kemacetan',
-        'kapasitas',
+        'kontak',
         'is_active'
     ];
 

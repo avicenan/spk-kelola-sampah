@@ -92,8 +92,8 @@
                 @endsection
             @endif
             <div class="col-12">
-                <x-adminlte-datatable id="table5" :heads="$heads" :config="$config" theme="light" striped hoverable
-                    with-buttons>
+                <x-adminlte-datatable id="table1" :heads="$heads" :config="$config" theme="light" striped hoverable
+                    bordered with-buttons class="border border-black rounded">
                     @foreach ($config['data'] as $item)
                         <tr>
                             @foreach ($item as $key => $value)
