@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kriteria;
-use App\Http\Requests\StoreKriteriaRequest;
-use App\Http\Requests\UpdateKriteriaRequest;
+use Illuminate\Http\Request;
 
 class KriteriaController extends Controller
 {
@@ -12,59 +11,73 @@ class KriteriaController extends Controller
     {
         $this->middleware('auth');
     }
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
-        return view('kriteria.index');
+        $kriterias = Kriteria::orderBy('id', 'asc')->get(['id', 'nama', 'sifat', 'bobot']);
+        return view('kriteria.index', compact('kriterias'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreKriteriaRequest $request)
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'sifat' => 'required|string|max:255',
+            'bobot' => 'required|numeric|min:0|max:1',
+        ]);
+        try {
+            Kriteria::create([
+                'nama' => $request->nama,
+                'sifat' => $request->sifat,
+                'bobot' => $request->bobot,
+            ]);
+            return redirect()->route('kriteria.index')->with('success', 'Kriteria berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'Gagal menambahkan Kriteria: ' . $e->getMessage());
+        }
+    }
+
+    public function show(Kriteria $kriterium)
     {
         //
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Kriteria $kriteria)
+    public function edit(Kriteria $kriterium)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Kriteria $kriteria)
+    public function update(Request $request, Kriteria $kriterium)
     {
-        //
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'sifat' => 'required|string|max:255',
+            'bobot' => 'required|numeric|min:0|max:1',
+        ]);
+        try {
+            $kriterium->update([
+                'nama' => $request->nama,
+                'sifat' => $request->sifat,
+                'bobot' => $request->bobot,
+            ]);
+            return redirect()->route('kriteria.index')->with('success', 'Kriteria berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'Gagal memperbarui Kriteria: ' . $e->getMessage());
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateKriteriaRequest $request, Kriteria $kriteria)
+    public function destroy(Kriteria $kriterium)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Kriteria $kriteria)
-    {
-        //
+        try {
+            $kriterium->delete();
+            return redirect()->route('kriteria.index')->with('success', 'Kriteria berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'Gagal menghapus Kriteria: ' . $e->getMessage());
+        }
     }
 }

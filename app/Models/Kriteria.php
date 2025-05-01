@@ -7,6 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Kriteria extends Model
 {
-    /** @use HasFactory<\Database\Factories\KriteriaFactory> */
     use HasFactory;
+
+    // protected $table = 'kriterias';
+    protected $fillable = [
+        'nama',
+        'sifat',
+        'bobot',
+    ];
 }

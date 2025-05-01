@@ -14,7 +14,8 @@ class KeputusanController extends Controller
 
     public function index()
     {
-        return view('keputusan.index');
+        $keputusans = Keputusan::orderBy('id', 'asc')->get(['id', 'judul', 'isi']);
+        return view('keputusan.index', compact('keputusans'));
     }
 
     public function create()

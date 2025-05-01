@@ -163,14 +163,14 @@
                 </div>
                 <div class="form-group">
                     <label for="kontak">Kontak</label>
-                    <input type="text" class="form-control" id="kontak" name="kontak">
+                    <input type="tel" class="form-control" id="kontak" name="kontak">
                 </div>
                 <div class="form-group">
                     <label for="jenis_sampah">Jenis Sampah</label>
                     <div id="createJenisSampahList">
                         <div class="input-group mb-2 jenis-sampah-row">
                             <select class="form-control" name="jenis_sampah[]" required>
-                                <option value="" disabled readonly>-- Pilih Jenis Sampah --</option>
+                                <option selected disabled>-- Pilih Jenis Sampah --</option>
                                 @foreach ($allJenisSampah as $jenis)
                                     <option value="{{ $jenis->id }}">{{ $jenis->nama }}</option>
                                 @endforeach
@@ -244,7 +244,7 @@
                 </div>
                 <div class="form-group">
                     <label for="kontak">Kontak</label>
-                    <input type="text" class="form-control" id="editTPAKontak" name="kontak">
+                    <input type="tel" class="form-control" id="editTPAKontak" name="kontak">
                 </div>
                 <div class="form-group">
                     <label for="jenis_sampah">Jenis Sampah</label>

@@ -14,8 +14,12 @@ return new class extends Migration
             $table->foreignId('tpa_id')->constrained('tpa');
             $table->foreignId('jenis_sampah_id')->constrained('jenis_sampah');
             $table->decimal('berat', 10, 2); // berat sampah dalam kg
+            $table->integer('biaya'); // dalam rupiah
+            $table->integer('tingkat_kemacetan'); // min1 max 5
             $table->string('judul');
             $table->text('isi');
+            $table->date('from');
+            $table->date('to');
             $table->timestamps();
             $table->softDeletes();
         });

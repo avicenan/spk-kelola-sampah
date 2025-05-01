@@ -125,6 +125,7 @@
                 </x-adminlte-datatable>
             </div>
         </div>
+
         {{-- Create Jenis Sampah --}}
         <x-adminlte-modal id="createJenisSampah" title="Tambah Jenis Sampah" theme="primary" icon="fa fa-plus" v-centered>
             <form action="{{ route('jenis-sampah.store') }}" id="createJenisSampahForm" method="POST">
