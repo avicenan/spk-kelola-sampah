@@ -116,10 +116,9 @@
                                         onclick="$('#deleteJenisSampahForm').attr('action', '/jenis-sampah/{{ $item[0] }}'); $('#deleteJenisSampahNama').text('{{ $item[1] }}');">
                                         <i class="fa fa-lg fa-fw fa-trash"></i>
                                     </button>
-
-
                                 </nobr>
                             </td>
+
                         </tr>
                     @endforeach
                 </x-adminlte-datatable>

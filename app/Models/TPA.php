@@ -14,16 +14,8 @@ class TPA extends Model
     protected $fillable = [
         'nama',
         'alamat',
-        'jarak',
         'kontak',
         'is_active'
-    ];
-
-    protected $casts = [
-        'is_active' => 'boolean',
-        'jarak' => 'decimal:2',
-        'biaya' => 'decimal:2',
-        'kapasitas' => 'decimal:2'
     ];
 
     public function jenisSampah()
@@ -41,5 +33,12 @@ class TPA extends Model
     public function aktifitas()
     {
         return $this->hasMany(Aktifitas::class);
+    }
+
+    public function kriterias()
+    {
+        return $this->belongsToMany(Kriteria::class, 'tpa_kriteria', 'tpa_id', 'kriteria_id')
+            ->withPivot('nilai')
+            ->withTimestamps();
     }
 }

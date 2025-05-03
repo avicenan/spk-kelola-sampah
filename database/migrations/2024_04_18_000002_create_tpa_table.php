@@ -12,10 +12,6 @@ return new class extends Migration
             $table->id();
             $table->string('nama');
             $table->text('alamat');
-            $table->decimal('jarak', 10, 2); // dalam kilometer
-            // $table->decimal('biaya', 10, 2); // dalam rupiah
-            // $table->integer('skala_kemacetan');
-            // $table->decimal('kapasitas', 10, 2); // dalam hektare
             $table->string('kontak')->nullable(); // nomor telepon atau kontak TPA
             $table->boolean('is_active')->default(true);
             $table->timestamps();

@@ -90,102 +90,117 @@ class KeputusanController extends Controller
 
     public function calculate(Request $request)
     {
-        // 1. Ambil data jarak dari tabel TPA atau Alternatif
-        $alternatifs = JenisSampah::find($request->jenis_sampah_id)->tpas; // pastikan model TPA sudah ada
+        $request->validate([
+            'jenis_sampah_id' => 'required|exists:jenis_sampah,id',
+            'biaya' => 'required|numeric|min:0',
+            'tingkat_kemacetan' => 'required|in:1,2,3,4,5',
+            'from' => 'required|date',
+            'to' => 'required|date',
+            'jumlah_sampah' => 'required|numeric|min:0',
+        ]);
 
-        // 2. Ambil nilai tetap dari request
-        $nilaiTetap = [
-            'biaya' => $request->biaya,
-            'tingkat_kemacetan' => $request->tingkat_kemacetan
-        ];
+        try {
+            // 1. Ambil data TPA atau Alternatif
+            $alternatifs = JenisSampah::find($request->jenis_sampah_id)->tpas;
 
-        // 3. Definisikan kriteria dan bobot
-        $kriterias = Kriteria::all(['id', 'nama', 'sifat', 'bobot']);
+            // 2. Ambil nilai tetap dari request
+            $nilaiTetap = [
+                'biaya' => $request->biaya,
+                'tingkat_kemacetan' => $request->tingkat_kemacetan
+            ];
 
-        // 4. Bangun nilai alternatif
-        $nilaiAlternatif = [];
+            // 3. Definisikan kriteria dan bobot
+            $kriterias = Kriteria::all(['id', 'nama', 'sifat', 'bobot']);
 
-        foreach ($alternatifs as $alt) {
-            $data = [];
+            // 4. Bangun nilai alternatif
+            $nilaiAlternatif = [];
 
-            foreach ($kriterias as $k) {
-                $nama = $k->nama;
+            foreach ($alternatifs as $alt) {
+                $data = [];
 
-                if (isset($nilaiTetap[$nama])) {
-                    // dari form request, semua alternatif nilainya sama
-                    $data[$nama] = $nilaiTetap[$nama];
-                } elseif (isset($alt->$nama)) {
-                    // dari field alternatif (e.g. jarak, aksesibilitas, dst)
-                    $data[$nama] = $alt->$nama;
-                } else {
-                    $data[$nama] = 0; // fallback jika tidak ditemukan
+                foreach ($kriterias as $k) {
+                    $nama = $k->nama;
+
+                    if (array_key_exists($nama, $nilaiTetap)) {
+                        // dari form request, semua alternatif nilainya sama
+                        $data[$nama] = $nilaiTetap[$nama];
+                    } else {
+                        // dari tpa_kriteria pivot table
+                        $data[$nama] = $alt->kriterias()->firstWhere('nama', $nama)->pivot->nilai ?? 0;
+                    }
+                }
+
+                $nilaiAlternatif[$alt->id] = $data;
+            }
+
+            // 5. Normalisasi
+            $normalisasi = [];
+            foreach ($kriterias as $krit) {
+                $nama = $krit['nama'];
+                $sifat = $krit['sifat'];
+
+                $values = collect($nilaiAlternatif)->pluck($nama);
+                $min = $values->min();
+                $max = $values->max();
+
+                foreach ($nilaiAlternatif as $altId => $data) {
+                    $val = $data[$nama] ?? 0;
+                    $r = $sifat === 'benefit'
+                        ? ($max != 0 ? $val / $max : 0)
+                        : ($val != 0 ? $min / $val : 0);
+                    $normalisasi[$altId][$nama] = $r;
                 }
             }
 
-            $nilaiAlternatif[$alt->id] = $data;
-        }
+            // 6. Hitung skor akhir
+            $hasil = [];
+            foreach ($normalisasi as $altId => $row) {
+                $skor = 0;
+                foreach ($row as $nama => $nilaiNorm) {
+                    $bobot = $kriterias->firstWhere('nama', $nama)['bobot'];
+                    $skor += $nilaiNorm * $bobot;
+                }
 
-        // 5. Normalisasi
-        $normalisasi = [];
-        foreach ($kriterias as $krit) {
-            $nama = $krit['nama'];
-            $sifat = $krit['sifat'];
-
-            $values = collect($nilaiAlternatif)->pluck($nama);
-            $min = $values->min();
-            $max = $values->max();
-
-            foreach ($nilaiAlternatif as $altId => $data) {
-                $val = $data[$nama] ?? 0;
-                $r = $sifat === 'benefit'
-                    ? ($max != 0 ? $val / $max : 0)
-                    : ($val != 0 ? $min / $val : 0);
-                $normalisasi[$altId][$nama] = $r;
-            }
-        }
-
-        // 6. Hitung skor akhir
-        $hasil = [];
-        foreach ($normalisasi as $altId => $row) {
-            $skor = 0;
-            foreach ($row as $nama => $nilaiNorm) {
-                $bobot = $kriterias->firstWhere('nama', $nama)['bobot'];
-                $skor += $nilaiNorm * $bobot;
+                $hasil[] = [
+                    'alternatif_id' => $altId,
+                    'skor' => round($skor * 100, 2),
+                ];
             }
 
-            $hasil[] = [
-                'alternatif_id' => $altId,
-                'skor' => round($skor * 100, 2),
-            ];
+            // 7. Urutkan dari skor tertinggi
+            $hasil = collect($hasil)->sortByDesc('skor')->values();
+
+            // 8. View Keputusan
+            $hasil = $hasil->map(function ($item, $index) use ($alternatifs, $nilaiTetap, $request) {
+                $alternatif = $alternatifs->find($item['alternatif_id']);
+                $item['view'] = [
+                    'rank' => $index + 1,
+                    'nama' => $alternatif->nama,
+                    'alamat' => $alternatif->alamat,
+                    'kontak' => $alternatif->kontak,
+                    'jarak' => $alternatif->kriterias()->firstWhere('nama', 'jarak')->pivot->nilai,
+                    'biaya' => $nilaiTetap['biaya'],
+                    'tingkat_kemacetan' => $nilaiTetap['tingkat_kemacetan'],
+                    'jenis_sampah' => JenisSampah::find($request->jenis_sampah_id)->nama,
+                    'sumber_sampah' => JenisSampah::find($request->jenis_sampah_id)->sumber_sampah,
+                    'from' => $request->from,
+                    'to' => $request->to,
+                    'jumlah_sampah' => $request->jumlah_sampah,
+                    'nama_pengguna' => Auth::user()->name,
+                    'email_pengguna' => Auth::user()->email,
+                    'role' => Auth::user()->role,
+                    'created_at' => now()
+                ];
+                return $item;
+            });
+
+            return response()->json($hasil);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat menghitung keputusan',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // 7. Urutkan dari skor tertinggi
-        $hasil = collect($hasil)->sortByDesc('skor')->values();
-
-        // 8.    View Keputusan
-        $hasil = $hasil->map(function ($item, $index) use ($alternatifs, $nilaiTetap, $request) {
-            $item['view'] = [
-                'rank' => $index + 1,
-                'nama' => $alternatifs->find($item['alternatif_id'])->nama,
-                'alamat' => $alternatifs->find($item['alternatif_id'])->alamat,
-                'jarak' => $alternatifs->find($item['alternatif_id'])->jarak,
-                'kontak' => $alternatifs->find($item['alternatif_id'])->kontak,
-                'biaya' => $nilaiTetap['biaya'],
-                'tingkat_kemacetan' => $nilaiTetap['tingkat_kemacetan'],
-                'jenis_sampah' => JenisSampah::find($request->jenis_sampah_id)->nama,
-                'sumber_sampah' => JenisSampah::find($request->jenis_sampah_id)->sumber_sampah,
-                'from' => $request->from,
-                'to' => $request->to,
-                'jumlah_sampah' => $request->jumlah_sampah,
-                'nama_pengguna' => Auth::user()->name,
-                'email_pengguna' => Auth::user()->email,
-                'role' => Auth::user()->role,
-                'created_at' => now()
-            ];
-            return $item;
-        });
-
-        return response()->json($hasil);
     }
 
     // public function getView(Request $request)

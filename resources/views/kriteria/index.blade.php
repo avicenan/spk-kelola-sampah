@@ -1,5 +1,7 @@
 @extends('adminlte::page')
 
+@section('plugins.Sweetalert2', true)
+
 @section('title', 'SPKSerela | Kriteria')
 
 @section('plugins.Datatables', true)
@@ -10,13 +12,14 @@
         'Label',
         'Sifat',
         'Bobot',
+        'Satuan Ukur',
         ['label' => 'Actions', 'no-export' => true, 'width' => 5],
     ];
 
     $config = [
         'data' => array_map('array_values', json_decode($kriterias, true)),
         'order' => [[0, 'asc']],
-        'columns' => [null, null, null, null],
+        'columns' => [null, null, null, null, null],
     ];
 @endphp
 
@@ -26,68 +29,14 @@
             <div class="col-12">
                 <h1 class="h3 mb-4 text-gray-800 font-weight-bold">Kriteria Keputusan</h1>
             </div>
-            <div class="mb-2">
-                <button class="btn btn-primary" data-toggle="modal" data-target="#createKriteria"> <i
+            <div class="mb-2 d-flex">
+                <button class="btn btn-primary mr-2 items-baseline" data-toggle="modal" data-target="#createKriteria"> <i
                         class="fa fa-plus mr-2"></i>
                     Tambah</button>
+                <div class="bg-white border p-2 rounded-sm">Total Bobot :
+                    <span>{{ $totalBobot * 100 }}%</span>
+                </div>
             </div>
-            @if (session('success'))
-                @section('js')
-                    <script>
-                        $(document).ready(function() {
-                            var Toast = Swal.mixin({
-                                toast: true,
-                                position: 'top-end',
-                                showConfirmButton: false,
-                                timer: 3000
-                            });
-                            Toast.fire({
-                                title: 'Success',
-                                text: '{{ session('success') }}',
-                                icon: 'success'
-                            });
-                        });
-                    </script>
-                @endsection
-            @endif
-            @if (session('error'))
-                @section('js')
-                    <script>
-                        $(document).ready(function() {
-                            var Toast = Swal.mixin({
-                                toast: true,
-                                position: 'top-end',
-                                showConfirmButton: false,
-                                timer: 3000
-                            });
-                            Toast.fire({
-                                title: 'Error',
-                                text: '{{ session('error') }}',
-                                icon: 'error'
-                            });
-                        });
-                    </script>
-                @endsection
-            @endif
-            @if ($errors->any())
-                @section('js')
-                    <script>
-                        $(document).ready(function() {
-                            var Toast = Swal.mixin({
-                                toast: true,
-                                position: 'top-end',
-                                showConfirmButton: false,
-                                timer: 3000
-                            });
-                            Toast.fire({
-                                title: 'Error',
-                                text: '{{ $errors->first() }}',
-                                icon: 'error'
-                            });
-                        });
-                    </script>
-                @endsection
-            @endif
 
             <div class="col-12">
                 <x-adminlte-datatable id="tpaTable" :heads="$heads" :config="$config" theme="light" striped hoverable
@@ -111,25 +60,33 @@
                                             </h5>
                                         </td>
                                     @endif
+                                @elseif ($key === 5)
+                                    <td>
+                                        <nobr>
+                                            <button class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit"
+                                                data-toggle="modal" data-target="#editKriteria"
+                                                onclick="$('#editKriteriaForm').attr('action', '/kriteria/{{ $item[0] }}'); $('#editKriteriaLabel').val('{{ $item[1] }}'); $('#editKriteriaSifat').val('{{ $item[2] }}'); $('#editKriteriaBobot').val('{{ $item[3] }}'); $('#editKriteriaSatuanUkur').val('{{ $item[4] }}')">
+                                                <i class="fa fa-lg fa-fw fa-pen"></i>
+                                            </button>
+                                            @if ($value == true)
+                                                <button class="btn btn-xs btn-default text-danger mx-1 shadow"
+                                                    title="Delete" data-toggle="modal" data-target="#deleteKriteria"
+                                                    onclick="$('#deleteKriteriaForm').attr('action', '/kriteria/{{ $item[0] }}'); $('#deleteKriteriaLabel').text('{{ $item[0] }}');">
+                                                    <i class="fa fa-lg fa-fw fa-trash"></i>
+                                                </button>
+                                            @else
+                                                <button class="btn btn-xs btn-default text-secondary mx-1 shadow"
+                                                    title="Lock" disabled>
+                                                    <i class="fa fa-lg fa-fw fa-lock"></i>
+                                                </button>
+                                            @endif
+                                        </nobr>
+                                    </td>
                                 @else
-                                    <td>{{ ucfirst($value) }}</td>
+                                    <td>{{ $value }}</td>
                                 @endif
                             @endforeach
-                            <td>
-                                <nobr>
-                                    <button class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit"
-                                        data-toggle="modal" data-target="#editKriteria"
-                                        onclick="$('#editKriteriaForm').attr('action', '/kriteria/{{ $item[0] }}'); $('#editKriteriaLabel').val('{{ $item[1] }}'); $('#editKriteriaSifat').val('{{ $item[2] }}'); $('#editKriteriaBobot').val('{{ $item[3] }}')">
-                                        <i class="fa fa-lg fa-fw fa-pen"></i>
-                                    </button>
 
-                                    <button class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete"
-                                        data-toggle="modal" data-target="#deleteKriteria"
-                                        onclick="$('#deleteKriteriaForm').attr('action', '/kriteria/{{ $item[0] }}'); $('#deleteKriteriaLabel').text('{{ $item[0] }}');">
-                                        <i class="fa fa-lg fa-fw fa-trash"></i>
-                                    </button>
-                                </nobr>
-                            </td>
                         </tr>
                     @endforeach
                 </x-adminlte-datatable>
@@ -155,6 +112,10 @@
                 <div class="form-group">
                     <label for="bobot">Bobot</label>
                     <input type="number" name="bobot" id="bobot" class="form-control"></input>
+                </div>
+                <div class="form-group">
+                    <label for="satuan_ukur">Satuan Ukur</label>
+                    <input type="text" name="satuan_ukur" id="satuan_ukur" class="form-control"></input>
                 </div>
                 <x-slot name="footerSlot">
                     <button id="createKriteria" type="button" class="btn btn-primary"
@@ -183,6 +144,10 @@
                 <div class="form-group">
                     <label for="bobot">Bobot</label>
                     <input type="number" name="bobot" id="editKriteriaBobot" class="form-control"></input>
+                </div>
+                <div class="form-group">
+                    <label for="satuan_ukur">Satuan Ukur</label>
+                    <input type="text" name="satuan_ukur" id="editKriteriaSatuanUkur" class="form-control"></input>
                 </div>
                 <x-slot name="footerSlot">
                     <button id="editKriteria" type="button" class="btn btn-primary"

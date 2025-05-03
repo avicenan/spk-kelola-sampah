@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\JenisSampah;
+use App\Models\Kriteria;
 use App\Models\TPA;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -16,10 +17,16 @@ class TPAController extends Controller
 
     public function index()
     {
-
-        $tpas = TPA::with('jenisSampah:id,nama')->orderBy('id', 'asc')->get(['id', 'nama', 'alamat', 'jarak', 'kontak']);
+        $tpas = TPA::with([
+            'jenisSampah:id,nama',
+            'kriterias' => function ($query) {
+                $query->select('kriterias.id', 'label', 'nama', 'satuan_ukur')
+                    ->whereNotIn('nama', ['biaya', 'tingkat_kemacetan']);
+            }
+        ])->orderBy('tpa.id', 'asc')->get(['tpa.id', 'tpa.nama', 'alamat', 'kontak']);
         $allJenisSampah = JenisSampah::all(['id', 'nama']);
-        return view('tpa.index', compact('tpas', 'allJenisSampah'));
+        $kriterias = Kriteria::whereNotIn('nama', ['biaya', 'tingkat_kemacetan'])->get(['id', 'label', 'nama', 'satuan_ukur']);
+        return view('tpa.index', compact('tpas', 'allJenisSampah', 'kriterias'));
     }
 
     public function create()
@@ -32,7 +39,6 @@ class TPAController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string',
-            'jarak' => 'required|numeric|min:0',
             'kontak' => 'nullable|string|max:255',
             'jenis_sampah' => 'array',
             'jenis_sampah.*' => 'integer|exists:jenis_sampah,id',
@@ -43,7 +49,6 @@ class TPAController extends Controller
             $tpa = TPA::create([
                 'nama' => $request->nama,
                 'alamat' => $request->alamat,
-                'jarak' => $request->jarak,
                 'kontak' => $request->kontak,
                 'is_active' => $request->is_active ?? true
             ]);
@@ -74,18 +79,17 @@ class TPAController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string',
-            'jarak' => 'required|numeric|min:0',
             'kontak' => 'nullable|string|max:255',
             'jenis_sampah' => 'array',
             'jenis_sampah.*' => 'integer|exists:jenis_sampah,id',
             'is_active' => 'boolean',
+            'kriterias' => 'array'
         ]);
 
         try {
             $tpa->update([
                 'nama' => $request->nama,
                 'alamat' => $request->alamat,
-                'jarak' => $request->jarak,
                 'kontak' => $request->kontak,
                 'is_active' => $request->is_active ?? true
             ]);
@@ -95,6 +99,17 @@ class TPAController extends Controller
                 $tpa->jenisSampah()->sync($request->jenis_sampah);
             } else {
                 $tpa->jenisSampah()->sync([]);
+            }
+
+            // Handle kriterias[] sync
+            if ($request->has('kriterias')) {
+                $kriterias = [];
+                foreach ($request->kriterias as $kriteriaId => $nilai) {
+                    $kriterias[$kriteriaId] = ['nilai' => $nilai];
+                }
+                $tpa->kriterias()->sync($kriterias);
+            } else {
+                $tpa->kriterias()->sync([]);
             }
 
             return redirect()->route('tpa.index')->with('success', 'TPA berhasil diperbarui');

@@ -6,21 +6,29 @@
 @section('plugins.Datatables', true)
 
 @php
+    $kriteriasHeads = $kriterias
+        ->map(function ($kriteria) {
+            return $kriteria->label . ' (' . $kriteria->satuan_ukur . ')';
+        })
+        ->toArray();
+
     $heads = [
         ['label' => 'No', 'width' => 4],
-        'Nama TPA',
-        'Alamat',
-        'Jarak (km)',
-        'Kontak',
-        ['label' => 'Jenis Sampah', 'width' => 30],
+        ['label' => 'Nama TPA', 'width' => 10],
+        ['label' => 'Alamat', 'width' => 10],
+        ['label' => 'Kontak', 'width' => 10],
+        ['label' => 'Jenis Sampah', 'width' => 25],
         ['label' => 'Actions', 'no-export' => true, 'width' => 5],
     ];
+
+    array_splice($heads, 5, 0, $kriteriasHeads);
 
     $config = [
         'data' => array_map('array_values', json_decode($tpas, true)),
         'order' => [[0, 'asc']],
-        'columns' => [null, null, null, null, null],
+        'columns' => [null, null, null, null],
     ];
+
 @endphp
 
 @section('content')
@@ -98,10 +106,18 @@
                             @foreach ($item as $key => $value)
                                 @if ($loop->first)
                                     <td>{{ $loop->parent->iteration }}</td>
-                                @elseif($key === 5)
-                                    <td>{{ implode(', ', array_column($value, 'nama')) }}</td>
+                                @elseif($key >= 5)
+                                    @foreach ($value as $krit)
+                                        <td>{{ $krit['pivot']['nilai'] }}</td>
+                                    @endforeach
+                                @elseif($key === 4)
+                                    <td>
+                                        {{ implode(', ', array_column($value, 'nama')) }}
+                                    </td>
                                 @else
-                                    <td>{{ $value }}</td>
+                                    <td>
+                                        {{ $value }}
+                                    </td>
                                 @endif
                             @endforeach
                             <td>
@@ -112,25 +128,32 @@
                                             $('#editTPAForm').attr('action', '/tpa/{{ $item[0] }}');
                                             $('#editTPANama').val('{{ $item[1] }}');
                                             $('#editTPAAlamat').val(`{{ $item[2] }}`);
-                                            $('#editTPAJarak').val('{{ $item[3] }}');
-                                            $('#editTPAKontak').val('{{ $item[4] }}');
+                                            $('#editTPAKontak').val('{{ $item[3] }}');
                                             // Populate jenisSampahContainer with readonly input for each item[5] and add delete button
                                             var jenisSampahHtml = '';
-                                            @php $jenisSampahArr = $item[5]; @endphp
+                                            @php $jenisSampahArr = $item[4]; @endphp
                                             @foreach ($jenisSampahArr as $idx => $js)
-                                                jenisSampahHtml += `
-                                                    <div class='input-group mb-2'>
-                                                        <input type='text' class='form-control' readonly value='{{ $js['nama'] }}'>
-                                                        <input type='hidden' name='jenis_sampah[]' value='{{ $js['id'] }}'>
-                                                        <div class='input-group-append'>
-                                                            <button type='button' class='btn btn-danger btn-sm' onclick='$(this).closest(&quot;.input-group&quot;).remove();'>
-                                                                <i class='fa fa-trash'></i>
-                                                            </button>
-                                                        </div>
+                                            jenisSampahHtml += `
+                                                <div class='input-group mb-2'>
+                                                    <input type='text' class='form-control' readonly value='{{ $js['nama'] }}'>
+                                                    <input type='hidden' name='jenis_sampah[]' value='{{ $js['id'] }}'>
+                                                    <div class='input-group-append'>
+                                                        <button type='button' class='btn btn-danger btn-sm' onclick='$(this).closest(&quot;.input-group&quot;).remove();'>
+                                                            <i class='fa fa-trash'></i>
+                                                        </button>
                                                     </div>
-                                                `; @endforeach
+                                                </div>
+                                            `; @endforeach
+                                            // insert value to all kriteria
+                                            var kriteriaList = {{ json_encode($item[5]) }};
+                                            $.each(kriteriaList, function(key, value) {
+                                                var kriteriaId = value['id'];
+                                                var kriteriaNilai = value['pivot']['nilai'];
+                                                $('#editTPA' + kriteriaId).val(kriteriaNilai);
+                                            });
                                             $('#jenisSampahContainer').html(jenisSampahHtml);
                                         ">
+                                        {{-- {{ dd($item[5], 'okee') }} --}}
                                         <i class="fa fa-lg fa-fw fa-pen"></i>
                                     </button>
                                     <button class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete"
@@ -145,6 +168,7 @@
                 </x-adminlte-datatable>
             </div>
         </div>
+
         {{-- Create TPA --}}
         <x-adminlte-modal id="createTPA" title="Tambah TPA" theme="primary" icon="fa fa-plus" v-centered>
             <form action="{{ route('tpa.store') }}" id="createTPAForm" method="POST">
@@ -156,10 +180,6 @@
                 <div class="form-group">
                     <label for="alamat">Alamat</label>
                     <textarea name="alamat" id="alamat" class="form-control"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="jarak">Jarak (km)</label>
-                    <input type="number" step="0.01" class="form-control" id="jarak" name="jarak">
                 </div>
                 <div class="form-group">
                     <label for="kontak">Kontak</label>
@@ -217,6 +237,13 @@
                         });
                     });
                 </script>
+                @foreach ($kriterias as $krit)
+                    <div class="form-group">
+                        <label for="{{ $krit->id }}">{{ $krit->label . ' (' . $krit->satuan_ukur . ')' }}</label>
+                        <input type="number" class="form-control" id="{{ $krit->id }}"
+                            name="kriterias[{{ $krit->id }}]">
+                    </div>
+                @endforeach
                 <x-slot name="footerSlot">
                     <button id="createTPAButton" type="button" class="btn btn-primary"
                         onclick="$('#createTPAForm').submit();">Simpan</button>
@@ -237,10 +264,6 @@
                 <div class="form-group">
                     <label for="alamat">Alamat</label>
                     <textarea name="alamat" id="editTPAAlamat" class="form-control"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="jarak">Jarak (km)</label>
-                    <input type="number" step="0.01" class="form-control" id="editTPAJarak" name="jarak">
                 </div>
                 <div class="form-group">
                     <label for="kontak">Kontak</label>
@@ -301,6 +324,13 @@
                         });
                     </script>
                 </div>
+                @foreach ($kriterias as $krit)
+                    <div class="form-group">
+                        <label for="{{ $krit->id }}">{{ $krit->label . ' (' . $krit->satuan_ukur . ')' }}</label>
+                        <input type="number" class="form-control" id="{{ 'editTPA' . $krit->id }}"
+                            name="kriterias[{{ $krit->id }}]">
+                    </div>
+                @endforeach
                 <x-slot name="footerSlot">
                     <button id="editTPAButton" type="button" class="btn btn-primary"
                         onclick="$('#editTPAForm').submit();">Simpan Perubahan</button>

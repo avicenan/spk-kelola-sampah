@@ -1,0 +1,13 @@
+<x-adminlte-modal id="resultModal" title="Hasil Keputusan" theme="primary" scrollable v-centered>
+    <div id="resultModalContainer">
+        <div class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <x-slot name="footerSlot">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+    </x-slot>
+</x-adminlte-modal>

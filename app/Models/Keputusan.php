@@ -32,4 +32,9 @@ class Keputusan extends Model
     {
         return $this->hasMany(Aktifitas::class);
     }
+
+    public function hasils()
+    {
+        return $this->hasMany(HasilKeputusan::class);
+    }
 }

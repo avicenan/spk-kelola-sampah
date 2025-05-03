@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kriterias', function (Blueprint $table) {
+        Schema::create('tpa_kriteria', function (Blueprint $table) {
             $table->id();
-            $table->string('nama');
-            $table->string('label');
-            $table->enum('sifat', ['cost', 'benefit']);
-            $table->decimal('bobot', 10, 2);
-            $table->string('satuan_ukur')->nullable();
-            $table->boolean('is_deletable')->default(true);
+            $table->foreignId('tpa_id')->constrained('tpa')->onDelete('cascade');
+            $table->foreignId('kriteria_id')->constrained('kriterias')->onDelete('cascade');
+            $table->integer('nilai')->default(0);
             $table->timestamps();
         });
     }
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kriterias');
+        Schema::dropIfExists('tpa_kriteria');
     }
 };

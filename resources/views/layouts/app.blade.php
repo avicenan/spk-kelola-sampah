@@ -78,6 +78,44 @@
         </nav>
 
         <main class="py-4">
+            @if (session('success'))
+                @section('js')
+                    <script>
+                        $(document).ready(function() {
+                            var Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000
+                            });
+                            Toast.fire({
+                                title: 'Success',
+                                text: '{{ session('success') }}',
+                                icon: 'success'
+                            });
+                        });
+                    </script>
+                @endsection
+            @endif
+            @if (session('error'))
+                @section('js')
+                    <script>
+                        $(document).ready(function() {
+                            var Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000
+                            });
+                            Toast.fire({
+                                title: 'Error',
+                                text: '{{ session('error') }}',
+                                icon: 'error'
+                            });
+                        });
+                    </script>
+                @endsection
+            @endif
             @yield('content')
         </main>
     </div>
