@@ -19,11 +19,6 @@ class JenisSampahController extends Controller
         return view('jenis-sampah.index', compact('jenisSampah'));
     }
 
-    public function create()
-    {
-        return view('jenis-sampah.create');
-    }
-
     public function store(Request $request)
     {
         $request->validate([
@@ -43,16 +38,6 @@ class JenisSampahController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Gagal menambahkan jenis sampah: ' . $e->getMessage());
         }
-    }
-
-    public function show(JenisSampah $jenisSampah)
-    {
-        return response()->json($jenisSampah);
-    }
-
-    public function edit(JenisSampah $jenisSampah)
-    {
-        // return view('jenis-sampah.edit', compact('jenisSampah'));
     }
 
     public function update(Request $request, JenisSampah $jenisSampah)

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HasilKeputusan;
 use App\Models\JenisSampah;
 use App\Models\Keputusan;
 use App\Models\Kriteria;
@@ -16,9 +17,15 @@ class KeputusanController extends Controller
         $this->middleware('auth');
     }
 
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function index()
     {
-        $keputusans = Keputusan::orderBy('id', 'asc')->get(['id', 'judul', 'isi']);
+        $keputusans = Keputusan::orderBy('id', 'desc')->get(['id', 'created_at', 'judul', 'keterangan']);
+        $hasilKeputusans = HasilKeputusan::orderBy('id', 'asc')->limit(10)->get();
         $jenisSampahs = JenisSampah::all(['id', 'nama']);
         return view('keputusan.index', compact('keputusans', 'jenisSampahs'));
     }
@@ -27,66 +34,6 @@ class KeputusanController extends Controller
     {
         return view('keputusan.create');
     }
-
-    // public function calculate(Request $request)
-    // {
-
-    //     // Semua Kriteria
-    //     $kriterias = Kriteria::all(['id', 'nama', 'sifat', 'bobot']);
-
-    //     // TPAs with jenis sampah
-    //     $tpas = JenisSampah::find($request->jenis_sampah_id)->tpas;
-
-    //     $nilaiAlternatifs = $tpas->mapWithKeys(function ($tpa) use ($request) {
-    //         return [
-    //             $tpa->id => [
-    //                 'biaya' => $request->biaya,
-    //                 'tingkat_kemacetan' => $request->tingkat_kemacetan,
-    //                 'jarak' => $tpa->jarak
-    //             ]
-    //         ];
-    //     });
-
-    //     // Normalisasi Nilai
-    //     foreach ($kriterias as $krit) {
-    //         $nama = $krit['nama'];
-    //         $sifat = $krit['sifat'];
-
-    //         // Ambil semua nilai kriteria tersebut
-    //         $values = collect($nilaiAlternatifs)->pluck($nama);
-    //         $min = $values->min();
-    //         $max = $values->max();
-
-    //         foreach ($nilaiAlternatifs as $altId => $kriteriaNilai) {
-    //             $val = $kriteriaNilai[$nama];
-    //             $r = $sifat === 'benefit'
-    //                 ? ($val / $max)
-    //                 : ($min / $val);
-    //             $normalisasi[$altId][$nama] = $r;
-    //         }
-    //     }
-
-    //     return dd($normalisasi);
-
-    //     // 4. Hitung skor akhir
-    //     $hasil = [];
-
-    //     foreach ($normalisasi as $altId => $row) {
-    //         $skor = 0;
-    //         foreach ($row as $nama => $nilaiNorm) {
-    //             $bobot = $kriterias->firstWhere('nama', $nama)['bobot'];
-    //             $skor += $nilaiNorm * $bobot;
-    //         }
-    //         $hasil[] = [
-    //             'alternatif_id' => $altId,
-    //             'skor' => round($skor, 4),
-    //         ];
-    //     }
-
-    //     // 5. Urutkan hasil (nilai tertinggi terbaik)
-    //     $hasil = collect($hasil)->sortByDesc('skor')->values();
-    //     return dd($hasil);
-    // }
 
     public function calculate(Request $request)
     {
@@ -225,7 +172,24 @@ class KeputusanController extends Controller
 
     public function store(Request $request)
     {
-        //
+        try {
+            $hasils = collect(json_decode($request->data, true));
+
+            $user = Auth::user();
+
+            $keputusan = Keputusan::create([
+                'user_id' => $user->id,
+                'judul' => $user->name . ' membuat keputusan baru',
+                'keterangan' => 'Keputusan baru dihasilkan oleh ' . $user->name . ' untuk ' . $hasils[0]['view']['jenis_sampah'] . ' seberat ' . $hasils[0]['view']['jumlah_sampah'] . ' kg dengan biaya sebesar Rp ' . $hasils[0]['view']['biaya'] . ' Hasil: ' . $hasils[0]['view']['nama'],
+            ]);
+
+            return response()->json($hasils);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat menyimpan keputusan',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function show(Keputusan $keputusan)

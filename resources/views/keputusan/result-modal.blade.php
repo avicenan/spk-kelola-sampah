@@ -8,6 +8,8 @@
     </div>
 
     <x-slot name="footerSlot">
+        <button id="saveResult" type="button" class="btn btn-primary" hidden><i
+                class="fa fa-lg fa-fw fa-save"></i>Simpan</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
     </x-slot>
 </x-adminlte-modal>

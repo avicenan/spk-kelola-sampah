@@ -30,7 +30,7 @@ return new class extends Migration
             $table->string('email_pengguna');
             $table->string('role');
             $table->date('created_at');
-            $table->timestamps();
+            // $table->timestamps();
         });
     }
 
