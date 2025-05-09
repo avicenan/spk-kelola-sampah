@@ -300,11 +300,11 @@ return [
 
     'menu' => [
         // Navbar items:
-        [
-            'type' => 'navbar-search',
-            'text' => 'search',
-            'topnav_right' => true,
-        ],
+        // [
+        //     'type' => 'navbar-search',
+        //     'text' => 'search',
+        //     'topnav_right' => true,
+        // ],
         [
             'type' => 'fullscreen-widget',
             'topnav_right' => true,
@@ -348,30 +348,35 @@ return [
         //     ],
         // ],
         [
+            'text' => 'Dashboard',
+            'url' => 'dashboard',
+            'icon' => 'fas fa-fw fa-chart-pie mr-2'
+        ],
+        [
             'text' => 'Jenis Sampah',
             'url' => 'jenis-sampah',
-            'icon' => 'fas fa-fw fa-trash-alt'
+            'icon' => 'fas fa-fw fa-trash-alt mr-2'
         ],
         [
             'text' => 'TPS/TPA',
             'url' => 'tpa',
-            'icon' => 'fas fa-fw fa-warehouse'
+            'icon' => 'fas fa-fw fa-warehouse mr-2'
         ],
         [
             'text' => 'Form Keputusan',
             'url' => 'keputusan',
-            'icon' => 'fas fa-fw fa-file-alt'
+            'icon' => 'fas fa-fw fa-file-alt mr-2'
         ],
         ['header' => 'Lainnya'],
         [
             'text' => 'Kriteria',
             'url' => 'kriteria',
-            'icon' => 'fas fa-fw fa-sort'
+            'icon' => 'fas fa-fw fa-sort mr-2'
         ],
         [
             'text' => 'Riwayat Aktifitas',
             'url' => 'aktifitas',
-            'icon' => 'fas fa-fw fa-history'
+            'icon' => 'fas fa-fw fa-history mr-2'
         ],
         // ['header' => 'labels'],
         // [

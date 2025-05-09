@@ -13,7 +13,8 @@
     }
 @endphp
 
-@section('auth_header', __('adminlte::adminlte.register_message'))
+{{-- @section('auth_header', __('adminlte::adminlte.register_message')) --}}
+@section('auth_header', 'Sign Up')
 
 @section('auth_body')
     <form action="{{ $registerUrl }}" method="post">
@@ -102,8 +103,10 @@
 
 @section('auth_footer')
     <p class="my-0">
+        Already have an account?
         <a href="{{ $loginUrl }}">
-            {{ __('adminlte::adminlte.i_already_have_a_membership') }}
+            {{-- {{ __('adminlte::adminlte.i_already_have_a_membership') }} --}}
+            Login
         </a>
     </p>
 @stop

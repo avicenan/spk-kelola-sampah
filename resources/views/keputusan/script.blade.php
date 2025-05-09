@@ -75,7 +75,7 @@
                                                         <div class=" mb-2">
                                                             <div class="font-weight-bold">Tingkat Kemacetan:</div>
                                                             <div>
-                                                                <span class="badge ${hasil.view.tingkat_kemacetan >= 1 && hasil.view.tingkat_kemacetan <= 2 ? 'badge-success' : hasil.view.tingkat_kemacetan >= 3 && hasil.view.tingkat_kemacetan <= 4 ? 'badge-warning' : 'badge-danger'}">${hasil.view.tingkat_kemacetan}</span>
+                                                                <span class="badge ${hasil.view.tingkat_kemacetan >= 1 && hasil.view.tingkat_kemacetan <= 2 ? 'badge-primary' : hasil.view.tingkat_kemacetan >= 3 && hasil.view.tingkat_kemacetan <= 4 ? 'badge-warning' : 'badge-danger'}">${hasil.view.tingkat_kemacetan} - ${hasil.view.tingkat_kemacetan >= 1 && hasil.view.tingkat_kemacetan <= 2 ? 'Kurang' : hasil.view.tingkat_kemacetan >= 3 && hasil.view.tingkat_kemacetan <= 4 ? 'Sedang' : 'Banyak'}</span>
                                                             </div>
                                                         </div>
                                                     </div>

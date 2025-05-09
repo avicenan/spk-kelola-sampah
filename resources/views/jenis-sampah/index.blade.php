@@ -3,9 +3,7 @@
 
 @section('title', 'SPKSerela | Jenis Sampah')
 
-{{-- Setup data for datatables --}}
 @section('plugins.Datatables', true)
-{{-- @section('plugins.DatatablesPlugin', true) --}}
 
 @php
 
@@ -34,6 +32,7 @@
                         class="fa fa-plus mr-2"></i>
                     Tambah</button>
             </div>
+
             @if (session('success'))
                 @section('js')
                     <script>
@@ -91,6 +90,7 @@
                     </script>
                 @endsection
             @endif
+
             <div class="col-12">
                 <x-adminlte-datatable id="table1" :heads="$heads" :config="$config" theme="light" striped hoverable
                     bordered with-buttons class="border border-black rounded">
@@ -126,7 +126,7 @@
         </div>
 
         {{-- Create Jenis Sampah --}}
-        <x-adminlte-modal id="createJenisSampah" title="Tambah Jenis Sampah" theme="primary" icon="fa fa-plus" v-centered>
+        <x-adminlte-modal id="createJenisSampah" title="Tambah Jenis Sampah" icon="fa fa-plus" v-centered>
             <form action="{{ route('jenis-sampah.store') }}" id="createJenisSampahForm" method="POST">
                 @csrf
                 <div class="form-group">
@@ -146,7 +146,7 @@
         </x-adminlte-modal>
 
         {{-- Edit Jenis Sampah --}}
-        <x-adminlte-modal id="editJenisSampah" title="Edit Jenis Sampah" theme="primary" icon="fa fa-pen" v-centered>
+        <x-adminlte-modal id="editJenisSampah" title="Edit Jenis Sampah" icon="fa fa-pen" v-centered>
             <form action="" id="editJenisSampahForm" method="POST">
                 @csrf
                 @method('PUT')
@@ -160,7 +160,7 @@
                 </div>
                 <x-slot name="footerSlot">
                     <button id="editJenisSampahButton" type="button" class="btn btn-primary"
-                        onclick="$('#editJenisSampahForm').submit();">Simpan Perubahan</button>
+                        onclick="$('#editJenisSampahForm').submit();">Simpan</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
                 </x-slot>
             </form>

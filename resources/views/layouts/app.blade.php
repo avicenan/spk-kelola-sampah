@@ -17,17 +17,6 @@
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     @section('plugins.Sweetalert2', true)
-
-    <script>
-        $(document).ready(function() {
-            var Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000
-            });
-        })
-    </script>
 </head>
 
 <body>
@@ -94,6 +83,12 @@
                 @section('js')
                     <script>
                         $(document).ready(function() {
+                            var Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000
+                            });
                             Toast.fire({
                                 title: 'Success',
                                 text: '{{ session('success') }}',
@@ -107,6 +102,12 @@
                 @section('js')
                     <script>
                         $(document).ready(function() {
+                            var Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000
+                            });
                             Toast.fire({
                                 title: 'Error',
                                 text: '{{ session('error') }}',

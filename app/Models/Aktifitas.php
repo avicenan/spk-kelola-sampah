@@ -13,8 +13,8 @@ class Aktifitas extends Model
     protected $table = 'aktifitas';
     protected $fillable = [
         'user_id',
-        'tpa_id',
         'keputusan_id',
+        'jenis',
         'deskripsi'
     ];
 

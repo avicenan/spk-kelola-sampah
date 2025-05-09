@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Aktifitas;
 use App\Models\JenisSampah;
 use App\Models\Kriteria;
 use App\Models\TPA;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
 class TPAController extends Controller
@@ -27,11 +29,6 @@ class TPAController extends Controller
         $allJenisSampah = JenisSampah::all(['id', 'nama']);
         $kriterias = Kriteria::whereNotIn('nama', ['biaya', 'tingkat_kemacetan'])->get(['id', 'label', 'nama', 'satuan_ukur']);
         return view('tpa.index', compact('tpas', 'allJenisSampah', 'kriterias'));
-    }
-
-    public function create()
-    {
-        return view('tpa.create');
     }
 
     public function store(Request $request)
@@ -58,20 +55,30 @@ class TPAController extends Controller
                 $tpa->jenisSampah()->attach($request->jenis_sampah);
             }
 
-            return redirect()->route('tpa.index')->with('success', 'TPA berhasil ditambahkan');
+            // Handle kriterias[] attach
+            if ($request->has('kriterias')) {
+                $kriterias = [];
+                foreach ($request->kriterias as $kriteriaId => $nilai) {
+                    $kriterias[$kriteriaId] = ['nilai' => $nilai];
+                }
+                $tpa->kriterias()->attach($kriterias);
+            } else {
+                $tpa->kriterias()->attach([]);
+            }
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Gagal menambahkan TPA: ' . $e->getMessage());
+        } finally {
+            try {
+                Aktifitas::create([
+                    'user_id' => Auth::user()->id,
+                    'jenis' => 'add_tpa',
+                    'deskripsi' => '[' . Auth::user()->name . '] menambahkan TPA ' . $request->nama
+                ]);
+            } catch (\Exception $e) {
+                return redirect()->back()->withInput()->with('error', 'Gagal menambahkan TPA: ' . $e->getMessage());
+            }
+            return redirect()->route('tpa.index')->with('success', 'TPA berhasil ditambahkan');
         }
-    }
-
-    public function show(TPA $tpa)
-    {
-        return response()->json($tpa);
-    }
-
-    public function edit(TPA $tpa)
-    {
-        // return view('tpa.edit', compact('tpa'));
     }
 
     public function update(Request $request, TPA $tpa)
@@ -111,10 +118,19 @@ class TPAController extends Controller
             } else {
                 $tpa->kriterias()->sync([]);
             }
-
-            return redirect()->route('tpa.index')->with('success', 'TPA berhasil diperbarui');
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Gagal memperbarui TPA: ' . $e->getMessage());
+        } finally {
+            try {
+                Aktifitas::create([
+                    'user_id' => Auth::user()->id,
+                    'jenis' => 'edit_tpa',
+                    'deskripsi' => '[' . Auth::user()->name . '] memperbarui TPA ' . $request->nama
+                ]);
+            } catch (\Exception $e) {
+                return redirect()->back()->withInput()->with('error', 'Gagal memperbarui TPA: ' . $e->getMessage());
+            }
+            return redirect()->route('tpa.index')->with('success', 'TPA berhasil diperbarui');
         }
     }
 
@@ -122,9 +138,19 @@ class TPAController extends Controller
     {
         try {
             $tpa->delete();
-            return redirect()->route('tpa.index')->with('success', 'TPA berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Gagal menghapus TPA: ' . $e->getMessage());
+        } finally {
+            try {
+                Aktifitas::create([
+                    'user_id' => Auth::user()->id,
+                    'jenis' => 'delete_tpa',
+                    'deskripsi' => '[' . Auth::user()->name . '] menghapus TPA ' . $tpa->nama
+                ]);
+            } catch (\Exception $e) {
+                return redirect()->back()->withInput()->with('error', 'Gagal menghapus TPA: ' . $e->getMessage());
+            }
+            return redirect()->route('tpa.index')->with('success', 'TPA berhasil dihapus');
         }
     }
 }

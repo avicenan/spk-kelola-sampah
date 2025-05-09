@@ -15,22 +15,23 @@ return new class extends Migration
             $table->id();
             $table->foreignId('keputusan_id')->constrained('keputusan');
             $table->integer('rank');
+            $table->float('skor');
             $table->string('nama');
             $table->text('alamat');
             $table->string('kontak');
-            $table->float('jarak');
-            $table->float('biaya');
+            $table->integer('jarak');
+            $table->integer('biaya');
             $table->integer('tingkat_kemacetan');
             $table->string('jenis_sampah');
             $table->string('sumber_sampah');
             $table->date('from');
             $table->date('to');
-            $table->float('jumlah_sampah');
+            $table->integer('jumlah_sampah');
             $table->string('nama_pengguna');
             $table->string('email_pengguna');
             $table->string('role');
-            $table->date('created_at');
-            // $table->timestamps();
+            // $table->datetime('created_at');
+            $table->timestamps();
         });
     }
 

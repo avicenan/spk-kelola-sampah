@@ -26,7 +26,15 @@
     $config = [
         'data' => array_map('array_values', json_decode($tpas, true)),
         'order' => [[0, 'asc']],
-        'columns' => [null, null, null, null],
+        'columns' => [null, null, null, null, null],
+        'columnDefs' => [
+            [
+                'targets' => [-1],
+                'className' => 'text-center',
+                'data' => null,
+                'orderable' => false,
+            ],
+        ],
     ];
 
 @endphp
@@ -35,12 +43,14 @@
     <div class="container-fluid">
         <div class="row py-4">
             <div class="col-12">
-                <h1 class="h3 mb-4 text-gray-800 font-weight-bold">Data Tempat Pembuangan Akhir (TPA)</h1>
+                <h1 class="h3 mb-4 text-gray-800 font-weight-bold">Tempat Pembuangan Akhir (TPA)</h1>
+                <div class="mb-2">
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#createTPA"> <i
+                            class="fa fa-plus mr-2"></i>
+                        Tambah</button>
+                </div>
             </div>
-            <div class="mb-2">
-                <button class="btn btn-primary" data-toggle="modal" data-target="#createTPA"> <i class="fa fa-plus mr-2"></i>
-                    Tambah</button>
-            </div>
+
             @if (session('success'))
                 @section('js')
                     <script>
@@ -98,9 +108,10 @@
                     </script>
                 @endsection
             @endif
+
             <div class="col-12">
                 <x-adminlte-datatable id="tpaTable" :heads="$heads" :config="$config" theme="light" striped hoverable
-                    bordered with-buttons class="border border-black rounded">
+                    bordered class="border border-black rounded">
                     @foreach ($config['data'] as $item)
                         <tr>
                             @foreach ($item as $key => $value)
@@ -170,7 +181,7 @@
         </div>
 
         {{-- Create TPA --}}
-        <x-adminlte-modal id="createTPA" title="Tambah TPA" theme="primary" icon="fa fa-plus" v-centered>
+        <x-adminlte-modal id="createTPA" title="Tambah TPA" icon="fa fa-plus" v-centered scrollable>
             <form action="{{ route('tpa.store') }}" id="createTPAForm" method="POST">
                 @csrf
                 <div class="form-group">
@@ -253,7 +264,7 @@
         </x-adminlte-modal>
 
         {{-- Edit TPA --}}
-        <x-adminlte-modal id="editTPA" title="Edit TPA" theme="primary" icon="fa fa-pen" v-centered>
+        <x-adminlte-modal id="editTPA" title="Edit TPA" icon="fa fa-pen" v-centered scrollable>
             <form action="" id="editTPAForm" method="POST">
                 @csrf
                 @method('PUT')
@@ -274,17 +285,11 @@
                     <div id="jenisSampahContainer"></div>
                     <div id="jenisSampahList">
                         <div class="input-group mb-2 jenis-sampah-row">
-                            <select class="form-control" name="jenis_sampah[]" required>
-                                <option value="" disabled readonly>-- Tambah Jenis Sampah --</option>
-                                @foreach ($allJenisSampah as $jenis)
-                                    <option value="{{ $jenis->id }}">{{ $jenis->nama }}</option>
-                                @endforeach
-                            </select>
+                            <button class="btn btn-outline-success add-jenis-sampah w-100" type="button"><i
+                                    class="fa fa-plus"></i></button>
                             <div class="input-group-append">
-                                <button class="btn btn-success add-jenis-sampah" type="button"><i
-                                        class="fa fa-plus"></i></button>
-                                <button class="btn btn-danger remove-jenis-sampah" type="button"><i
-                                        class="fa fa-minus"></i></button>
+                                {{-- <button class="btn btn-danger remove-jenis-sampah" type="button"><i
+                                        class="fa fa-minus"></i></button> --}}
                             </div>
                         </div>
                     </div>

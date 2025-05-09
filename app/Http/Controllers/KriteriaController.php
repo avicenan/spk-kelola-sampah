@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Aktifitas;
 use App\Models\Kriteria;
 use App\Models\TPA;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class KriteriaController extends Controller
 {
@@ -51,19 +53,19 @@ class KriteriaController extends Controller
                 }
             } catch (\Exception $e) {
                 return redirect()->back()->withInput()->with('error', 'Gagal menambahkan Kriteria: ' . $e->getMessage());
+            } finally {
+                try {
+                    Aktifitas::create([
+                        'user_id' => Auth::user()->id,
+                        'jenis' => 'add_kriteria',
+                        'deskripsi' => '[' . Auth::user()->name . '] menambahkan kriteria ' . $kriterium->label
+                    ]);
+                } catch (\Exception $e) {
+                    return redirect()->back()->withInput()->with('error', 'Gagal menambahkan Kriteria: ' . $e->getMessage());
+                }
+                return redirect()->route('kriteria.index')->with('success', 'Kriteria berhasil ditambahkan.');
             }
-            return redirect()->route('kriteria.index')->with('success', 'Kriteria berhasil ditambahkan.');
         }
-    }
-
-    public function show(Kriteria $kriterium)
-    {
-        //
-    }
-
-    public function edit(Kriteria $kriterium)
-    {
-        //
     }
 
     public function update(Request $request, Kriteria $kriterium)
@@ -91,10 +93,19 @@ class KriteriaController extends Controller
                     'satuan_ukur' => $request->satuan_ukur,
                 ]);
             }
-
-            return redirect()->route('kriteria.index')->with('success', 'Kriteria berhasil diperbarui.');
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Gagal memperbarui Kriteria: ' . $e->getMessage());
+        } finally {
+            try {
+                Aktifitas::create([
+                    'user_id' => Auth::user()->id,
+                    'jenis' => 'edit_kriteria',
+                    'deskripsi' => '[' . Auth::user()->name . '] memperbarui kriteria ' . $kriterium->label
+                ]);
+            } catch (\Exception $e) {
+                return redirect()->back()->withInput()->with('error', 'Gagal memperbarui Kriteria: ' . $e->getMessage());
+            }
+            return redirect()->route('kriteria.index')->with('success', 'Kriteria berhasil diperbarui.');
         }
     }
 
@@ -105,9 +116,19 @@ class KriteriaController extends Controller
                 return redirect()->back()->withInput()->with('error', 'Kriteria tidak dapat dihapus.');
             }
             $kriterium->delete();
-            return redirect()->route('kriteria.index')->with('success', 'Kriteria berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Gagal menghapus Kriteria: ' . $e->getMessage());
+        } finally {
+            try {
+                Aktifitas::create([
+                    'user_id' => Auth::user()->id,
+                    'jenis' => 'delete_kriteria',
+                    'deskripsi' => '[' . Auth::user()->name . '] menghapus kriteria ' . $kriterium->label
+                ]);
+            } catch (\Exception $e) {
+                return redirect()->back()->withInput()->with('error', 'Gagal menghapus Kriteria: ' . $e->getMessage());
+            }
+            return redirect()->route('kriteria.index')->with('success', 'Kriteria berhasil dihapus');
         }
     }
 }

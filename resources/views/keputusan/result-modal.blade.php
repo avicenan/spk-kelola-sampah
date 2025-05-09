@@ -1,4 +1,4 @@
-<x-adminlte-modal id="resultModal" title="Hasil Keputusan" theme="primary" scrollable v-centered>
+<x-adminlte-modal id="resultModal" title="Hasil Keputusan" theme='primary' scrollable v-centered static-backdrop>
     <div id="resultModalContainer">
         <div class="text-center my-5">
             <div class="spinner-border text-primary" role="status">

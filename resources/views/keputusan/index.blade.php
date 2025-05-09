@@ -7,12 +7,25 @@
 @section('plugins.TempusDominusBs4', true)
 
 @php
-    $heads = ['Tanggal', 'Aktifitas', 'Ket', ['label' => 'Actions', 'no-export' => true, 'width' => 5]];
+    $heads = ['id', 'Tanggal', 'Aktifitas', 'Ket'];
 
     $config = [
-        'data' => array_map('array_values', json_decode($keputusans, true)),
-        'order' => [[0, 'asc']],
-        'columns' => [null, null, null],
+        'data' => array_map(function ($v) {
+            $v['created_at'] = \Carbon\Carbon::parse($v['created_at'])
+                ->locale('id')
+                ->translatedFormat('l, d F Y H:i:s');
+            return array_values($v);
+        }, json_decode($keputusans, true)),
+        'order' => [[0, 'desc']],
+        'columns' => [['visible' => false], null, null, null],
+        'columnDefs' => [
+            [
+                'targets' => [0],
+                'visible' => false,
+                'searchable' => false,
+            ],
+        ],
+        'lengthMenu' => [5],
     ];
 @endphp
 
@@ -21,6 +34,64 @@
 @endsection
 
 @section('content')
+    @if (session('success'))
+        @section('js')
+            <script>
+                $(document).ready(function() {
+                    var Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                    Toast.fire({
+                        title: 'Success',
+                        text: '{{ session('success') }}',
+                        icon: 'success'
+                    });
+                });
+            </script>
+        @endsection
+    @endif
+    @if (session('error'))
+        @section('js')
+            <script>
+                $(document).ready(function() {
+                    var Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                    Toast.fire({
+                        title: 'Error',
+                        text: '{{ session('error') }}',
+                        icon: 'error'
+                    });
+                });
+            </script>
+        @endsection
+    @endif
+    @if ($errors->any())
+        @section('js')
+            <script>
+                $(document).ready(function() {
+                    var Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                    Toast.fire({
+                        title: 'Error',
+                        text: '{{ $errors->first() }}',
+                        icon: 'error'
+                    });
+                });
+            </script>
+        @endsection
+    @endif
+
     <div class="container-fluid">
         <div class="row py-4">
             <div class="col-12">
@@ -87,8 +158,14 @@
                         <div class="form-group">
                             <label for="tingkat_kemacetan">Tingkat Kemacetan <span
                                     class="text-muted font-weight-normal">(dari 1 hingga 5)</span></label>
-                            <input type="number" class="form-control" id="tingkat_kemacetan" name="tingkat_kemacetan"
-                                placeholder="Masukkan tingkat kemacetan" min="1" max="5">
+                            <select class="form-control" id="tingkat_kemacetan" name="tingkat_kemacetan">
+                                <option value="" disabled selected>Pilih tingkat kemacetan</option>
+                                <option value="1">1 - Lancar</option>
+                                <option value="2">2 - Lancar</option>
+                                <option value="3">3 - Sedang</option>
+                                <option value="4">4 - Sedang</option>
+                                <option value="5">5 - Macet</option>
+                            </select>
                         </div>
 
                         {{-- Submit Button --}}
@@ -110,22 +187,7 @@
 
             <div class="col-12">
                 <x-adminlte-datatable id="table1" :heads="$heads" :config="$config" theme="light" striped hoverable
-                    bordered with-buttons class="border border-black rounded">
-                    @foreach ($config['data'] as $item)
-                        <tr>
-                            @foreach ($item as $key => $value)
-                                @if ($loop->first)
-                                @elseif($key === 1)
-                                    <td>{{ \Carbon\Carbon::parse($value)->format('d-m-Y H:i:s') }}</td>
-                                @else
-                                    <td>{{ $value }}</td>
-                                @endif
-                            @endforeach
-                            <td>
-                                <p>nono</p>
-                            </td>
-                        </tr>
-                    @endforeach
+                    bordered class="border border-black rounded">
                 </x-adminlte-datatable>
             </div>
         </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Aktifitas;
 use App\Models\HasilKeputusan;
 use App\Models\JenisSampah;
 use App\Models\Keputusan;
@@ -9,6 +10,7 @@ use App\Models\Kriteria;
 use App\Models\TPA;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class KeputusanController extends Controller
 {
@@ -150,40 +152,66 @@ class KeputusanController extends Controller
         }
     }
 
-    // public function getView(Request $request)
-    // {
-    //     $tpa = TPA::find($request->tpa_id);
-    //     $jenisSampah = JenisSampah::find($tpa->jenis_sampah_id);
-
-
-    //     $view = [
-    //         'tanggal' => now(),
-    //         'rank' => $request->hasil['rank'],
-    //         'nama' => $tpa->nama,
-    //         'alamat' => $tpa->alamat,
-    //         'jarak' => $tpa->jarak,
-    //         'kontak' => $tpa->kontak,
-    //         'biaya' => $request->biaya,
-    //         'jenis_sampah' => $jenisSampah->nama,
-    //         'tingkat_kemacetan' => $request->tingkat_kemacetan
-
-    //     ];
-    // }
-
     public function store(Request $request)
     {
+        $request->validate([
+            'data' => 'required|json'
+        ]);
+
         try {
             $hasils = collect(json_decode($request->data, true));
-
             $user = Auth::user();
 
-            $keputusan = Keputusan::create([
-                'user_id' => $user->id,
-                'judul' => $user->name . ' membuat keputusan baru',
-                'keterangan' => 'Keputusan baru dihasilkan oleh ' . $user->name . ' untuk ' . $hasils[0]['view']['jenis_sampah'] . ' seberat ' . $hasils[0]['view']['jumlah_sampah'] . ' kg dengan biaya sebesar Rp ' . $hasils[0]['view']['biaya'] . ' Hasil: ' . $hasils[0]['view']['nama'],
-            ]);
+            // Start database transaction
+            return DB::transaction(function () use ($hasils, $user) {
+                // Create keputusan
+                $keputusan = Keputusan::create([
+                    'user_id' => $user->id,
+                    'judul' => $user->name . ' membuat keputusan baru',
+                    'keterangan' => 'Keputusan baru dihasilkan oleh ' . $user->name . ' untuk ' . $hasils[0]['view']['jenis_sampah'] . ' seberat ' . $hasils[0]['view']['jumlah_sampah'] . ' kg dengan biaya sebesar Rp ' . $hasils[0]['view']['biaya'] . ' Hasil: ' . $hasils[0]['view']['nama'],
+                ]);
 
-            return response()->json($hasils);
+                // Create hasil keputusan records
+                $hasilKeputusanData = $hasils->map(function ($hasil) use ($keputusan) {
+                    return [
+                        'keputusan_id' => $keputusan->id,
+                        'skor' => $hasil['skor'],
+                        'rank' => $hasil['view']['rank'],
+                        'nama' => $hasil['view']['nama'],
+                        'alamat' => $hasil['view']['alamat'],
+                        'kontak' => $hasil['view']['kontak'],
+                        'jarak' => $hasil['view']['jarak'],
+                        'biaya' => $hasil['view']['biaya'],
+                        'tingkat_kemacetan' => $hasil['view']['tingkat_kemacetan'],
+                        'jenis_sampah' => $hasil['view']['jenis_sampah'],
+                        'sumber_sampah' => $hasil['view']['sumber_sampah'],
+                        'from' => \Carbon\Carbon::parse($hasil['view']['from'])->format('Y-m-d H:i:s'),
+                        'to' => \Carbon\Carbon::parse($hasil['view']['to'])->format('Y-m-d H:i:s'),
+                        'jumlah_sampah' => $hasil['view']['jumlah_sampah'],
+                        'nama_pengguna' => $hasil['view']['nama_pengguna'],
+                        'email_pengguna' => $hasil['view']['email_pengguna'],
+                        'role' => $hasil['view']['role'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                })->toArray();
+
+                // Bulk insert hasil keputusan records
+                HasilKeputusan::insert($hasilKeputusanData);
+
+                // Create aktivitas record
+                Aktifitas::create([
+                    'user_id' => $user->id,
+                    'keputusan_id' => $keputusan->id,
+                    'jenis' => 'add_keputusan',
+                    'deskripsi' => '[' . $user->name . '] membuat keputusan baru untuk ' . $hasils[0]['view']['jenis_sampah'] . ' seberat ' . $hasils[0]['view']['jumlah_sampah'] . ' kg dengan biaya sebesar Rp ' . $hasils[0]['view']['biaya'] . ' Hasil: ' . $hasils[0]['view']['nama'],
+                ]);
+
+                return response()->json([
+                    'message' => 'Keputusan berhasil disimpan',
+                    'data' => $keputusan->hasils
+                ]);
+            });
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan saat menyimpan keputusan',
@@ -192,23 +220,10 @@ class KeputusanController extends Controller
         }
     }
 
-    public function show(Keputusan $keputusan)
+    public function getHasilKeputusan($aktivitasId)
     {
-        return view('keputusan.show', compact('keputusan'));
-    }
-
-    public function edit(Keputusan $keputusan)
-    {
-        return view('keputusan.edit', compact('keputusan'));
-    }
-
-    public function update(Request $request, Keputusan $keputusan)
-    {
-        //
-    }
-
-    public function destroy(Keputusan $keputusan)
-    {
-        //
+        $aktivitas = Aktifitas::find($aktivitasId);
+        $hasilKeputusan = $aktivitas->keputusan->hasils;
+        return response()->json($hasilKeputusan);
     }
 }

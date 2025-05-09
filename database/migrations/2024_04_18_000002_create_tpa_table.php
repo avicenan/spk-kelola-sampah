@@ -14,6 +14,7 @@ return new class extends Migration
             $table->text('alamat');
             $table->string('kontak')->nullable(); // nomor telepon atau kontak TPA
             $table->boolean('is_active')->default(true);
+            $table->integer('selected_count')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

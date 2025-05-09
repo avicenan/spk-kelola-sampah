@@ -20,7 +20,8 @@
     }
 @endphp
 
-@section('auth_header', __('adminlte::adminlte.login_message'))
+{{-- @section('auth_header', __('adminlte::adminlte.login_message')) --}}
+@section('auth_header', 'Login')
 
 @section('auth_body')
     <form action="{{ $loginUrl }}" method="post">
@@ -75,9 +76,11 @@
             </div>
 
             <div class="col-5">
-                <button type=submit class="btn btn-block {{ config('adminlte.classes_auth_btn', 'btn-flat btn-primary') }}">
+                <button type=submit
+                    class="btn btn-block {{ config('adminlte.classes_auth_btn', 'btn-flat btn-primary') }}">
                     <span class="fas fa-sign-in-alt"></span>
-                    {{ __('adminlte::adminlte.sign_in') }}
+                    {{-- {{ __('adminlte::adminlte.sign_in') }} --}}
+                    Login
                 </button>
             </div>
         </div>
@@ -86,19 +89,21 @@
 
 @section('auth_footer')
     {{-- Password reset link --}}
-    @if($passResetUrl)
+    {{-- @if ($passResetUrl)
         <p class="my-0">
             <a href="{{ $passResetUrl }}">
                 {{ __('adminlte::adminlte.i_forgot_my_password') }}
             </a>
         </p>
-    @endif
+    @endif --}}
 
     {{-- Register link --}}
-    @if($registerUrl)
+    @if ($registerUrl)
         <p class="my-0">
+            Don't have an account?
             <a href="{{ $registerUrl }}">
-                {{ __('adminlte::adminlte.register_a_new_membership') }}
+                {{-- {{ __('adminlte::adminlte.register') }} --}}
+                Sign Up
             </a>
         </p>
     @endif

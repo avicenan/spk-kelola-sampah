@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Aktifitas;
 use App\Models\JenisSampah;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
 class JenisSampahController extends Controller
@@ -28,15 +30,25 @@ class JenisSampahController extends Controller
         ]);
 
         try {
-            JenisSampah::create([
+            $jenisSampah = JenisSampah::create([
                 'nama' => $request->nama,
                 'sumber_sampah' => $request->sumber_sampah,
                 'is_active' => $request->is_active ?? true
             ]);
-
-            return redirect()->route('jenis-sampah.index')->with('success', 'Jenis sampah berhasil ditambahkan');
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Gagal menambahkan jenis sampah: ' . $e->getMessage());
+        } finally {
+            try {
+                Aktifitas::create([
+                    'user_id' => Auth::user()->id,
+                    'jenis' => 'add_jenis_sampah',
+                    'deskripsi' => '[' . Auth::user()->name . '] menambahkan jenis sampah ' . $jenisSampah->nama,
+                ]);
+            } catch (\Exception $e) {
+                return redirect()->back()->withInput()->with('error', 'Gagal menambahkan jenis sampah: ' . $e->getMessage());
+            }
+
+            return redirect()->route('jenis-sampah.index')->with('success', 'Jenis sampah berhasil ditambahkan');
         }
     }
 
@@ -54,10 +66,19 @@ class JenisSampahController extends Controller
                 'sumber_sampah' => $request->sumber_sampah,
                 'is_active' => $request->is_active ?? true
             ]);
-
-            return redirect()->route('jenis-sampah.index')->with('success', 'Jenis sampah berhasil diperbarui');
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Gagal memperbarui jenis sampah: ' . $e->getMessage());
+        } finally {
+            try {
+                Aktifitas::create([
+                    'user_id' => Auth::user()->id,
+                    'jenis' => 'edit_jenis_sampah',
+                    'deskripsi' => '[' . Auth::user()->name . '] memperbarui jenis sampah ' . $jenisSampah->nama,
+                ]);
+            } catch (\Exception $e) {
+                return redirect()->back()->withInput()->with('error', 'Gagal memperbarui jenis sampah: ' . $e->getMessage());
+            }
+            return redirect()->route('jenis-sampah.index')->with('success', 'Jenis sampah berhasil diperbarui');
         }
     }
 
@@ -65,9 +86,15 @@ class JenisSampahController extends Controller
     {
         try {
             $jenisSampah->delete();
-            return redirect()->route('jenis-sampah.index')->with('success', 'Jenis sampah berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Gagal menghapus jenis sampah: ' . $e->getMessage());
+        } finally {
+            Aktifitas::create([
+                'user_id' => Auth::user()->id,
+                'jenis' => 'delete_jenis_sampah',
+                'deskripsi' => '[' . Auth::user()->name . '] menghapus jenis sampah ' . $jenisSampah->nama
+            ]);
+            return redirect()->route('jenis-sampah.index')->with('success', 'Jenis sampah berhasil dihapus');
         }
     }
 }

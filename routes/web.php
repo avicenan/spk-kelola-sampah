@@ -7,6 +7,7 @@ use App\Http\Controllers\JenisSampahController;
 use App\Http\Controllers\TPAController;
 use App\Http\Controllers\KeputusanController;
 use App\Http\Controllers\AktifitasController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KriteriaController;
 
 /*
@@ -22,7 +23,7 @@ use App\Http\Controllers\KriteriaController;
 
 Route::get('/', function () {
     if (Auth::check()) {
-        return redirect()->route('home');
+        return redirect()->route('dashboard');
     }
     return redirect()->route('login');
 });
@@ -31,7 +32,7 @@ Auth::routes();
 
 Route::middleware(['auth'])->group(function () {
     // Dashboard
-    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Jenis Sampah
     Route::resource('jenis-sampah', JenisSampahController::class);
@@ -42,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
     // Keputusan
     Route::resource('keputusan', KeputusanController::class);
     Route::post('/keputusan/calculate', [KeputusanController::class, 'calculate'])->name('keputusan.calculate');
+    Route::get('/keputusan/getHasilKeputusan/{aktivitasId}', [KeputusanController::class, 'getHasilKeputusan'])->name('keputusan.getHasilKeputusan');
 
     // Aktifitas
     Route::resource('aktifitas', AktifitasController::class);
