@@ -13,6 +13,7 @@ class KriteriaController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+        $this->middleware('role:kepala_divisi');
     }
 
     public function index()

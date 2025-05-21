@@ -132,10 +132,11 @@
                                 @endif
                             @endforeach
                             <td>
-                                <nobr>
-                                    <button class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit"
-                                        data-toggle="modal" data-target="#editTPA"
-                                        onclick="
+                                @if (Auth::user()->role === 'staff')
+                                    <nobr>
+                                        <button class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit"
+                                            data-toggle="modal" data-target="#editTPA"
+                                            onclick="
                                             $('#editTPAForm').attr('action', '/tpa/{{ $item[0] }}');
                                             $('#editTPANama').val('{{ $item[1] }}');
                                             $('#editTPAAlamat').val(`{{ $item[2] }}`);
@@ -164,15 +165,16 @@
                                             });
                                             $('#jenisSampahContainer').html(jenisSampahHtml);
                                         ">
-                                        {{-- {{ dd($item[5], 'okee') }} --}}
-                                        <i class="fa fa-lg fa-fw fa-pen"></i>
-                                    </button>
-                                    <button class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete"
-                                        data-toggle="modal" data-target="#deleteTPA"
-                                        onclick="$('#deleteTPAForm').attr('action', '/tpa/{{ $item[0] }}'); $('#deleteTPANama').text('{{ $item[1] }}');">
-                                        <i class="fa fa-lg fa-fw fa-trash"></i>
-                                    </button>
-                                </nobr>
+                                            {{-- {{ dd($item[5], 'okee') }} --}}
+                                            <i class="fa fa-lg fa-fw fa-pen"></i>
+                                        </button>
+                                        <button class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete"
+                                            data-toggle="modal" data-target="#deleteTPA"
+                                            onclick="$('#deleteTPAForm').attr('action', '/tpa/{{ $item[0] }}'); $('#deleteTPANama').text('{{ $item[1] }}');">
+                                            <i class="fa fa-lg fa-fw fa-trash"></i>
+                                        </button>
+                                    </nobr>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

@@ -118,8 +118,7 @@
                                 @php
                                     $inputDateConfig = ['format' => 'DD-MM-YYYY'];
                                 @endphp
-                                <x-adminlte-input-date name="from" :config="$inputDateConfig"
-                                    placeholder="Choose a start date...">
+                                <x-adminlte-input-date name="from" :config="$inputDateConfig" placeholder="Pilih tanggal awal...">
                                     <x-slot name="appendSlot">
                                         <div class="input-group-text bg-secondary">
                                             <i class="fas fa-calendar-alt"></i>
@@ -127,7 +126,8 @@
                                     </x-slot>
                                 </x-adminlte-input-date>
                                 <span class="m-1 fs-3 fw-bold">-</span>
-                                <x-adminlte-input-date name="to" :config="$inputDateConfig" placeholder="Choose a end date...">
+                                <x-adminlte-input-date name="to" :config="$inputDateConfig"
+                                    placeholder="Pilih tanggal akhir...">
                                     <x-slot name="appendSlot">
                                         <div class="input-group-text bg-secondary">
                                             <i class="fas fa-calendar-alt"></i>

@@ -104,19 +104,21 @@
                                 @endif
                             @endforeach
                             <td>
-                                <nobr>
-                                    <button class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit"
-                                        data-toggle="modal" data-target="#editJenisSampah"
-                                        onclick="$('#editJenisSampahForm').attr('action', '/jenis-sampah/{{ $item[0] }}'); $('#editJenisSampahNama').val('{{ $item[1] }}'); $('#editJenisSampahSumber').val('{{ $item[2] }}');">
-                                        <i class="fa fa-lg fa-fw fa-pen"></i>
-                                    </button>
+                                @if (Auth::user()->role === 'staff')
+                                    <nobr>
+                                        <button class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit"
+                                            data-toggle="modal" data-target="#editJenisSampah"
+                                            onclick="$('#editJenisSampahForm').attr('action', '/jenis-sampah/{{ $item[0] }}'); $('#editJenisSampahNama').val('{{ $item[1] }}'); $('#editJenisSampahSumber').val('{{ $item[2] }}');">
+                                            <i class="fa fa-lg fa-fw fa-pen"></i>
+                                        </button>
 
-                                    <button class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete"
-                                        data-toggle="modal" data-target="#deleteJenisSampah"
-                                        onclick="$('#deleteJenisSampahForm').attr('action', '/jenis-sampah/{{ $item[0] }}'); $('#deleteJenisSampahNama').text('{{ $item[1] }}');">
-                                        <i class="fa fa-lg fa-fw fa-trash"></i>
-                                    </button>
-                                </nobr>
+                                        <button class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete"
+                                            data-toggle="modal" data-target="#deleteJenisSampah"
+                                            onclick="$('#deleteJenisSampahForm').attr('action', '/jenis-sampah/{{ $item[0] }}'); $('#deleteJenisSampahNama').text('{{ $item[1] }}');">
+                                            <i class="fa fa-lg fa-fw fa-trash"></i>
+                                        </button>
+                                    </nobr>
+                                @endif
                             </td>
 
                         </tr>

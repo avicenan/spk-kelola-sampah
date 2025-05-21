@@ -371,12 +371,12 @@ return [
         [
             'text' => 'Kriteria',
             'url' => 'kriteria',
-            'icon' => 'fas fa-fw fa-sort mr-2'
+            'icon' => 'fas fa-fw fa-sort mr-2',
         ],
         [
             'text' => 'Riwayat Aktifitas',
             'url' => 'aktifitas',
-            'icon' => 'fas fa-fw fa-history mr-2'
+            'icon' => 'fas fa-fw fa-history mr-2',
         ],
         // ['header' => 'labels'],
         // [
