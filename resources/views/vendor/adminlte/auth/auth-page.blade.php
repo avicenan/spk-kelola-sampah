@@ -10,9 +10,9 @@
         $dashboardUrl = $dashboardUrl ? url($dashboardUrl) : '';
     }
 
-    $bodyClasses = "{$authType}-page";
+    $bodyClasses = "{$authType}-page ";
 
-    if (! empty(config('adminlte.layout_dark_mode', null))) {
+    if (!empty(config('adminlte.layout_dark_mode', null))) {
         $bodyClasses .= ' dark-mode';
     }
 @endphp
@@ -25,7 +25,7 @@
 @section('classes_body'){{ $bodyClasses }}@stop
 
 @section('body')
-    <div class="{{ $authType }}-box">
+    <div class="{{ $authType }}-box p-4 rounded-lg" style="background-color: #D9D9D9;">
 
         {{-- Logo --}}
         <div class="{{ $authType }}-logo">
@@ -34,19 +34,13 @@
                 {{-- Logo Image --}}
                 @if (config('adminlte.auth_logo.enabled', false))
                     <img src="{{ asset(config('adminlte.auth_logo.img.path')) }}"
-                         alt="{{ config('adminlte.auth_logo.img.alt') }}"
-                         @if (config('adminlte.auth_logo.img.class', null))
-                            class="{{ config('adminlte.auth_logo.img.class') }}"
-                         @endif
-                         @if (config('adminlte.auth_logo.img.width', null))
-                            width="{{ config('adminlte.auth_logo.img.width') }}"
-                         @endif
-                         @if (config('adminlte.auth_logo.img.height', null))
-                            height="{{ config('adminlte.auth_logo.img.height') }}"
-                         @endif>
+                        alt="{{ config('adminlte.auth_logo.img.alt') }}"
+                        @if (config('adminlte.auth_logo.img.class', null)) class="{{ config('adminlte.auth_logo.img.class') }}" @endif
+                        @if (config('adminlte.auth_logo.img.width', null)) width="{{ config('adminlte.auth_logo.img.width') }}" @endif
+                        @if (config('adminlte.auth_logo.img.height', null)) height="{{ config('adminlte.auth_logo.img.height') }}" @endif>
                 @else
-                    <img src="{{ asset(config('adminlte.logo_img')) }}"
-                         alt="{{ config('adminlte.logo_img_alt') }}" height="50">
+                    <img src="{{ asset(config('adminlte.logo_img')) }}" alt="{{ config('adminlte.logo_img_alt') }}"
+                        height="50">
                 @endif
 
                 {{-- Logo Label --}}
