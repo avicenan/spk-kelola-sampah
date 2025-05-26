@@ -14,7 +14,6 @@ return new class extends Migration
             $table->text('sumber_sampah')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

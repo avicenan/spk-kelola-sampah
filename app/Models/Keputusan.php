@@ -13,9 +13,8 @@ class Keputusan extends Model
     protected $table = 'keputusan';
     protected $fillable = [
         'user_id',
-        'tpa_id',
         'judul',
-        'isi'
+        'keterangan'
     ];
 
     public function user()
@@ -31,5 +30,10 @@ class Keputusan extends Model
     public function aktifitas()
     {
         return $this->hasMany(Aktifitas::class);
+    }
+
+    public function hasils()
+    {
+        return $this->hasMany(HasilKeputusan::class);
     }
 }
