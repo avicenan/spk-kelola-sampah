@@ -21,7 +21,8 @@
         </nav>
     </div>
 
-    <div class=" w-100 p-2 mt-6" style="margin-top: 100%;">
+    <div id="user-card" class="p-2 mt-6 user-panel"
+        style="position: fixed; bottom: 0; left: 0; width: 250px; z-index: 9999;">
         <div class="bg-navy p-2 rounded-lg d-flex justify-content-between items-center shadow-lg">
             <p class="text-center p-0 m-0 my-auto"><u>Logged as {{ Auth::user()->name }}</u></p>
             <form action="{{ route('logout') }}" method="POST">
@@ -30,5 +31,19 @@
             </form>
         </div>
     </div>
+
+    <div id="user-card-icon" class="p-2 mt-6 user-panel d-none"
+        style="position: fixed; bottom: 0; left: 0; width: 60px; z-index: 9999;">
+        <div class=" p-2 rounded-lg d-flex justify-content-center shadow-lg">
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-danger rounded-circle ml-2">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+
 
 </aside>
