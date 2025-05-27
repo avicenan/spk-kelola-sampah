@@ -37,8 +37,8 @@
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="d-flex align-items-center">
                                                 <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center border"
-                                                    style="width: 60px; height: 60px; margin-right: 15px;">
-                                                    <h3 class="mb-0 font-weight-bold">{{ $countKeputusan }}</h3>
+                                                    style="width: 40px; height: 40px; margin-right: 15px;">
+                                                    <h4 class="mb-0 font-weight-bold">{{ $countKeputusan }}</h4>
                                                 </div>
                                                 <div>
                                                     <h6 class="mb-0">Jumlah form SPK diajukan</h6>
@@ -54,38 +54,42 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="card border mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">TPA</h6>
+                                    </div>
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="d-flex align-items-center">
                                                 <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center border"
-                                                    style="width: 60px; height: 60px; margin-right: 15px;">
-                                                    <h3 class="mb-0 font-weight-bold">{{ $countTPA }}</h3>
+                                                    style="width: 40px; height: 40px; margin-right: 15px;">
+                                                    <h4 class="mb-0 font-weight-bold">{{ $countTPA }}</h4>
                                                 </div>
                                                 <div>
-                                                    <h6 class="mb-0">TPA</h6>
-                                                    <small class="text-muted">Total Terdaftar</small>
+                                                    <small class="text-muted">Terdaftar</small>
                                                 </div>
                                             </div>
-                                            <i class="fas fa-warehouse fa-2x text-success"></i>
+                                            <i class="fas fa-warehouse fa-lg text-success"></i>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="card border mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Jenis Sampah</h6>
+                                    </div>
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="d-flex align-items-center">
                                                 <div class="rounded-circle bg-warning text-white d-flex align-items-center justify-content-center border"
-                                                    style="width: 60px; height: 60px; margin-right: 15px;">
-                                                    <h3 class="mb-0 font-weight-bold">{{ $countJenisSampah }}</h3>
+                                                    style="width: 40px; height: 40px; margin-right: 15px;">
+                                                    <h4 class="mb-0 font-weight-bold">{{ $countJenisSampah }}</h4>
                                                 </div>
                                                 <div>
-                                                    <h6 class="mb-0">Jenis Sampah</h6>
-                                                    <small class="text-muted">Total Terdaftar</small>
+                                                    <small class="text-muted">Terdaftar</small>
                                                 </div>
                                             </div>
-                                            <i class="fas fa-trash fa-2x text-warning"></i>
+                                            <i class="fas fa-trash fa-lg text-warning"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -140,7 +144,9 @@
                                                 <h3 class="card-title">Distribusi Jenis Sampah</h3>
                                             </div>
                                             <div class="card-body">
-                                                <canvas id="pieChart" style="min-height: 100px;"></canvas>
+                                                <div>
+                                                    <canvas id="pieChart"></canvas>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -176,12 +182,13 @@
                 <div class="row">
                     @foreach ($topTPA as $item)
                         <div class="col-md-2">
-                            <div class="card border mb-4">
+                            <div class="card border">
+                                <div class="card-header">
+                                    <h6 class="mb-0 text-truncate" style="max-width: 150px;">{{ $item->nama }}</h6>
+                                </div>
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
-                                            <h6 class="mb-0 text-truncate" style="max-width: 150px;">{{ $item->nama }}
-                                            </h6>
                                             <h2 class="mb-0">{{ $item->total_wins }}x</h2>
                                             <small>Terpilih</small>
                                             <div class="text-muted mt-1">Total: {{ $item->total_weight }} kg</div>
@@ -201,14 +208,11 @@
 @section('js')
     <script>
         $(document).ready(function() {
-            // Get the canvas element
+            // Weight Chart
             var ctx = document.getElementById('weightChart').getContext('2d');
-
-            // Get chart data
             var dates = @json($fiveDaysSampah['dates']);
             var totals = @json($fiveDaysSampah['totals']);
 
-            // Create the chart
             var weightChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -248,27 +252,65 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return context.dataset.label + ': ' + context.parsed.y + ' kg';
+                                    return context.raw + ' kg';
                                 }
                             }
                         }
                     }
                 }
             });
-        });
-    </script>
 
-    <script>
-        $(document).ready(function() {
-            var ctx = document.getElementById('pieChart').getContext('2d');
-            var pieChart = new Chart(ctx, {
+            // Pie Chart
+            var pieCtx = document.getElementById('pieChart').getContext('2d');
+            var pieData = @json($topFourJenisSampah);
+
+            var pieChart = new Chart(pieCtx, {
                 type: 'pie',
                 data: {
-                    labels: @json($topFourJenisSampah->pluck('jenis_sampah')),
+                    labels: pieData.map(item => item.jenis_sampah),
                     datasets: [{
-                        data: @json($topFourJenisSampah->pluck('total_weight')),
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
+                        data: pieData.map(item => item.total_weight),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
                     }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                padding: 5,
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${context.label}: ${value} kg (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
                 }
             });
         });

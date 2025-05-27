@@ -63,14 +63,39 @@ class DashboardController extends Controller
 
     public function topTPA()
     {
-        $result = \App\Models\HasilKeputusan::where('rank', 1)
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
+        // Get all TPA names first
+        $allTPA = \App\Models\TPA::pluck('nama');
+
+        // Get results for rank 1
+        $rank1Results = \App\Models\HasilKeputusan::where('rank', 1)
             ->selectRaw('nama, COUNT(*) as total_wins, SUM(jumlah_sampah) as total_weight')
             ->groupBy('nama')
             ->orderByDesc('total_wins')
-            ->limit(6)
+            ->limit(12)
             ->get();
+
+        // Create a collection with all TPAs initialized to 0
+        $result = $allTPA->map(function ($nama) {
+            return (object)[
+                'nama' => $nama,
+                'total_wins' => 0,
+                'total_weight' => 0
+            ];
+        });
+
+        // Update values for TPAs that have rank 1 wins
+        $rank1Results->each(function ($item) use (&$result) {
+            $result = $result->map(function ($row) use ($item) {
+                if ($row->nama === $item->nama) {
+                    $row->total_wins = $item->total_wins;
+                    $row->total_weight = $item->total_weight;
+                }
+                return $row;
+            });
+        });
+
+        // Sort by total_wins and take top 6
+        $result = $result->sortByDesc('total_wins')->take(12)->values();
 
         return $result;
     }

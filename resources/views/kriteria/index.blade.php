@@ -29,9 +29,11 @@
             <div class="col-12">
                 <h1 class="h3 mb-4 text-gray-800 font-weight-bold">Kriteria Keputusan</h1>
                 <div class="mb-2 d-flex">
-                    <button class="btn btn-primary mr-2 items-baseline" data-toggle="modal" data-target="#createKriteria"> <i
-                            class="fa fa-plus mr-2"></i>
-                        Tambah</button>
+                    @if (Auth::user()->role === 'kepala_divisi')
+                        <button class="btn btn-primary mr-2 items-baseline" data-toggle="modal" data-target="#createKriteria">
+                            <i class="fa fa-plus mr-2"></i>
+                            Tambah</button>
+                    @endif
                     <div class="bg-white border p-2 rounded-sm">Total Bobot :
                         <span>{{ $totalBobot * 100 }}%</span>
                     </div>
@@ -120,27 +122,38 @@
                                         </td>
                                     @endif
                                 @elseif ($key === 5)
-                                    <td>
-                                        <nobr>
-                                            <button class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit"
-                                                data-toggle="modal" data-target="#editKriteria"
-                                                onclick="$('#editKriteriaForm').attr('action', '/kriteria/{{ $item[0] }}'); $('#editKriteriaLabel').val('{{ $item[1] }}'); $('#editKriteriaSifat').val('{{ $item[2] }}'); $('#editKriteriaBobot').val('{{ $item[3] }}'); $('#editKriteriaSatuanUkur').val('{{ $item[4] }}')">
-                                                <i class="fa fa-lg fa-fw fa-pen"></i>
-                                            </button>
-                                            @if ($value == true)
-                                                <button class="btn btn-xs btn-default text-danger mx-1 shadow"
-                                                    title="Delete" data-toggle="modal" data-target="#deleteKriteria"
-                                                    onclick="$('#deleteKriteriaForm').attr('action', '/kriteria/{{ $item[0] }}'); $('#deleteKriteriaLabel').text('{{ $item[1] }}');">
-                                                    <i class="fa fa-lg fa-fw fa-trash"></i>
+                                    @if (Auth::user()->role === 'kepala_divisi')
+                                        <td>
+                                            <nobr>
+                                                <button class="btn btn-xs btn-default text-primary mx-1 shadow"
+                                                    title="Edit" data-toggle="modal" data-target="#editKriteria"
+                                                    onclick="$('#editKriteriaForm').attr('action', '/kriteria/{{ $item[0] }}'); $('#editKriteriaLabel').val('{{ $item[1] }}'); $('#editKriteriaSifat').val('{{ $item[2] }}'); $('#editKriteriaBobot').val('{{ $item[3] }}'); $('#editKriteriaSatuanUkur').val('{{ $item[4] }}')">
+                                                    <i class="fa fa-lg fa-fw fa-pen"></i>
                                                 </button>
-                                            @else
+                                                @if ($value == true)
+                                                    <button class="btn btn-xs btn-default text-danger mx-1 shadow"
+                                                        title="Delete" data-toggle="modal" data-target="#deleteKriteria"
+                                                        onclick="$('#deleteKriteriaForm').attr('action', '/kriteria/{{ $item[0] }}'); $('#deleteKriteriaLabel').text('{{ $item[1] }}');">
+                                                        <i class="fa fa-lg fa-fw fa-trash"></i>
+                                                    </button>
+                                                @else
+                                                    <button class="btn btn-xs btn-default text-secondary mx-1 shadow"
+                                                        title="Lock" disabled>
+                                                        <i class="fa fa-lg fa-fw fa-lock"></i>
+                                                    </button>
+                                                @endif
+                                            </nobr>
+                                        </td>
+                                    @else
+                                        <td>
+                                            <nobr>
                                                 <button class="btn btn-xs btn-default text-secondary mx-1 shadow"
                                                     title="Lock" disabled>
                                                     <i class="fa fa-lg fa-fw fa-lock"></i>
                                                 </button>
-                                            @endif
-                                        </nobr>
-                                    </td>
+                                            </nobr>
+                                        </td>
+                                    @endif
                                 @else
                                     <td>{{ $value }}</td>
                                 @endif
@@ -153,36 +166,38 @@
         </div>
 
         {{-- Create Kriteria --}}
-        <x-adminlte-modal id="createKriteria" title="Tambah Kriteria" theme="primary" icon="fa fa-plus" v-centered>
-            <form action="{{ route('kriteria.store') }}" id="createKriteriaForm" method="POST">
-                @csrf
-                <div class="form-group">
-                    <label for="label">Nama</label>
-                    <input type="text" class="form-control" id="label" name="label">
-                </div>
-                <div class="form-group">
-                    <label for="sifat">Sifat</label>
-                    <select name="sifat" id="sifat" class="form-control">
-                        <option selected disabled>--- Pilih Sifat ---</option>
-                        <option value="cost">Cost</option>
-                        <option value="benefit">Benefit</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="bobot">Bobot</label>
-                    <input type="number" name="bobot" id="bobot" class="form-control"></input>
-                </div>
-                <div class="form-group">
-                    <label for="satuan_ukur">Satuan Ukur</label>
-                    <input type="text" name="satuan_ukur" id="satuan_ukur" class="form-control"></input>
-                </div>
-                <x-slot name="footerSlot">
-                    <button id="createKriteria" type="button" class="btn btn-primary"
-                        onclick="$('#createKriteriaForm').submit();">Simpan</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                </x-slot>
-            </form>
-        </x-adminlte-modal>
+        @if (Auth::user()->role === 'kepala_divisi')
+            <x-adminlte-modal id="createKriteria" title="Tambah Kriteria" theme="primary" icon="fa fa-plus" v-centered>
+                <form action="{{ route('kriteria.store') }}" id="createKriteriaForm" method="POST">
+                    @csrf
+                    <div class="form-group">
+                        <label for="label">Nama</label>
+                        <input type="text" class="form-control" id="label" name="label">
+                    </div>
+                    <div class="form-group">
+                        <label for="sifat">Sifat</label>
+                        <select name="sifat" id="sifat" class="form-control">
+                            <option selected disabled>--- Pilih Sifat ---</option>
+                            <option value="cost">Cost</option>
+                            <option value="benefit">Benefit</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bobot">Bobot</label>
+                        <input type="number" name="bobot" id="bobot" class="form-control"></input>
+                    </div>
+                    <div class="form-group">
+                        <label for="satuan_ukur">Satuan Ukur</label>
+                        <input type="text" name="satuan_ukur" id="satuan_ukur" class="form-control"></input>
+                    </div>
+                    <x-slot name="footerSlot">
+                        <button id="createKriteria" type="button" class="btn btn-primary"
+                            onclick="$('#createKriteriaForm').submit();">Simpan</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    </x-slot>
+                </form>
+            </x-adminlte-modal>
+        @endif
 
         {{-- Edit Kriteria --}}
         <x-adminlte-modal id="editKriteria" title="Edit Kriteria" theme="primary" icon="fa fa-pen" v-centered>
