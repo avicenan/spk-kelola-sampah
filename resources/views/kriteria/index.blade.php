@@ -7,19 +7,76 @@
 @section('plugins.Datatables', true)
 
 @php
+
     $heads = [
-        ['label' => 'No', 'width' => 4],
+        ['label' => 'ID', 'width' => 4],
         'Nama',
         'Sifat',
         'Bobot',
         'Satuan Ukur',
+        'Is Deletable',
         ['label' => 'Actions', 'no-export' => true, 'width' => 5],
     ];
 
     $config = [
-        'data' => array_map('array_values', json_decode($kriterias, true)),
+        'data' => array_map(function ($v) {
+            $v['actions'] =
+                '<nobr>
+                <button class="btn btn-xs btn-default text-primary mx-1 shadow" 
+                    title="Edit" 
+                    data-toggle="modal" 
+                    data-target="#editKriteria"
+                    onclick="$(\'#editKriteriaForm\').attr(\'action\', \'/kriteria/' .
+                $v['id'] .
+                '\'); 
+                             $(\'#editKriteriaLabel\').val(\'' .
+                $v['label'] .
+                '\');
+                             $(\'#editKriteriaSifat\').val(\'' .
+                $v['sifat'] .
+                '\');
+                             $(\'#editKriteriaBobot\').val(\'' .
+                $v['bobot'] .
+                '\');
+                             $(\'#editKriteriaSatuanUkur\').val(\'' .
+                $v['satuan_ukur'] .
+                '\');">
+                    <i class="fa fa-lg fa-fw fa-pen"></i>
+                </button>' .
+                ($v['is_deletable']
+                    ? '<button class="btn btn-xs btn-default text-danger mx-1 shadow"
+                    title="Delete" 
+                    data-toggle="modal" 
+                    data-target="#deleteKriteria"
+                    onclick="$(\'#deleteKriteriaForm\').attr(\'action\', \'/kriteria/' .
+                        $v['id'] .
+                        '\');
+                             $(\'#deleteKriteriaLabel\').text(\'' .
+                        $v['label'] .
+                        '\');">
+                    <i class="fa fa-lg fa-fw fa-trash"></i>
+                </button>'
+                    : '<button class="btn btn-xs btn-default text-secondary mx-1 shadow"
+                    title="Lock" 
+                    disabled>
+                    <i class="fa fa-lg fa-fw fa-lock"></i>
+                </button>') .
+                '</nobr>';
+            if ($v['sifat'] == 'cost') {
+                $v['sifat'] = '<span class="badge badge-pill badge-warning">Cost</span>';
+            } else {
+                $v['sifat'] = '<span class="badge badge-pill badge-success">Benefit</span>';
+            }
+            return array_values($v);
+        }, json_decode($kriterias, true)),
         'order' => [[0, 'asc']],
-        'columns' => [null, null, null, null, null],
+        'columns' => [null, null, null, null, null, ['visible' => false], null],
+        'columnDefs' => [
+            [
+                'targets' => [4],
+                'visible' => false,
+            ],
+        ],
     ];
 @endphp
 
@@ -100,7 +157,7 @@
             @endif
 
             <div class="col-12">
-                <x-adminlte-datatable id="tpaTable" :heads="$heads" :config="$config" theme="light" striped hoverable
+                {{-- <x-adminlte-datatable id="tpaTable" :heads="$heads" :config="$config" theme="light" striped hoverable
                     bordered with-buttons class="border border-black rounded">
                     @foreach ($config['data'] as $item)
                         <tr>
@@ -161,6 +218,9 @@
 
                         </tr>
                     @endforeach
+                </x-adminlte-datatable> --}}
+                <x-adminlte-datatable id="tpaTable" :heads="$heads" :config="$config" theme="light" striped hoverable
+                    bordered with-buttons class="border border-black rounded">
                 </x-adminlte-datatable>
             </div>
         </div>
@@ -172,7 +232,8 @@
                     @csrf
                     <div class="form-group">
                         <label for="label">Nama</label>
-                        <input type="text" class="form-control" id="label" name="label">
+                        <input type="text" class="form-control" id="label" name="label"
+                            placeholder="Masukkan nama kriteria.">
                     </div>
                     <div class="form-group">
                         <label for="sifat">Sifat</label>
@@ -184,11 +245,13 @@
                     </div>
                     <div class="form-group">
                         <label for="bobot">Bobot</label>
-                        <input type="number" name="bobot" id="bobot" class="form-control"></input>
+                        <input type="number" name="bobot" id="bobot" class="form-control" step="0.1"
+                            placeholder="Masukkan bobot kriteria."></input>
                     </div>
                     <div class="form-group">
                         <label for="satuan_ukur">Satuan Ukur</label>
-                        <input type="text" name="satuan_ukur" id="satuan_ukur" class="form-control"></input>
+                        <input type="text" name="satuan_ukur" id="satuan_ukur" class="form-control"
+                            placeholder="Masukkan satuan ukur kriteria."></input>
                     </div>
                     <x-slot name="footerSlot">
                         <button id="createKriteria" type="button" class="btn btn-primary"
@@ -206,7 +269,8 @@
                 @method('PUT')
                 <div class="form-group">
                     <label for="editKriteriaLabel">Nama</label>
-                    <input type="text" class="form-control" id="editKriteriaLabel" name="label">
+                    <input type="text" class="form-control" id="editKriteriaLabel" name="label"
+                        placeholder="Masukkan nama kriteria.">
                 </div>
                 <div class="form-group">
                     <label for="sifat">Sifat</label>
@@ -217,11 +281,13 @@
                 </div>
                 <div class="form-group">
                     <label for="bobot">Bobot</label>
-                    <input type="number" name="bobot" id="editKriteriaBobot" class="form-control"></input>
+                    <input type="number" name="bobot" id="editKriteriaBobot" class="form-control" step="0.1"
+                        placeholder="Masukkan bobot kriteria."></input>
                 </div>
                 <div class="form-group">
                     <label for="satuan_ukur">Satuan Ukur</label>
-                    <input type="text" name="satuan_ukur" id="editKriteriaSatuanUkur" class="form-control"></input>
+                    <input type="text" name="satuan_ukur" id="editKriteriaSatuanUkur" class="form-control"
+                        placeholder="Masukkan satuan ukur kriteria."></input>
                 </div>
                 <x-slot name="footerSlot">
                     <button id="editKriteria" type="button" class="btn btn-primary"

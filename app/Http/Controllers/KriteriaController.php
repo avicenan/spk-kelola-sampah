@@ -30,12 +30,19 @@ class KriteriaController extends Controller
 
     public function store(Request $request)
     {
+
         $request->validate([
             'label' => 'required|string|max:255',
             'sifat' => 'required|string|max:255',
             'bobot' => 'required|numeric|min:0|max:1',
             'satuan_ukur' => 'string|max:255',
         ]);
+
+        $totalBobot = Kriteria::sum('bobot');
+        if ($totalBobot + $request->bobot > 1) {
+            return redirect()->back()->withInput()->with('error', 'Total bobot tidak boleh melebihi 100%.');
+        }
+
         try {
             $kriterium = Kriteria::create([
                 'nama' => strtolower(str_replace(' ', '_', $request->label)),

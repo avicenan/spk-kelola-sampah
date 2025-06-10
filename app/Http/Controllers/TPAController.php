@@ -22,12 +22,14 @@ class TPAController extends Controller
         $tpas = TPA::with([
             'jenisSampah:id,nama',
             'kriterias' => function ($query) {
-                $query->select('kriterias.id', 'label', 'nama', 'satuan_ukur')
-                    ->whereNotIn('nama', ['biaya', 'tingkat_kemacetan']);
+                $query->select('kriterias.id', 'label', 'nama', 'satuan_ukur');
+                // ->whereNotIn('nama', ['biaya', 'tingkat_kemacetan']);
             }
         ])->orderBy('tpa.id', 'asc')->get(['tpa.id', 'tpa.nama', 'alamat', 'kontak']);
         $allJenisSampah = JenisSampah::all(['id', 'nama']);
-        $kriterias = Kriteria::whereNotIn('nama', ['biaya', 'tingkat_kemacetan'])->get(['id', 'label', 'nama', 'satuan_ukur']);
+        $kriterias = Kriteria::get(['id', 'label', 'nama', 'satuan_ukur']);
+        // ->whereNotIn('nama', ['biaya', 'tingkat_kemacetan']);
+        // return dd($tpas[0]->kriterias);
         return view('tpa.index', compact('tpas', 'allJenisSampah', 'kriterias'));
     }
 
@@ -39,7 +41,9 @@ class TPAController extends Controller
             'kontak' => 'nullable|string|max:255',
             'jenis_sampah' => 'array',
             'jenis_sampah.*' => 'integer|exists:jenis_sampah,id',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'kriterias' => 'required|array',
+            'kriterias.*' => 'required|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/'
         ]);
 
         try {
@@ -90,7 +94,8 @@ class TPAController extends Controller
             'jenis_sampah' => 'array',
             'jenis_sampah.*' => 'integer|exists:jenis_sampah,id',
             'is_active' => 'boolean',
-            'kriterias' => 'array'
+            'kriterias' => 'required|array',
+            'kriterias.*' => 'required|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/'
         ]);
 
         try {

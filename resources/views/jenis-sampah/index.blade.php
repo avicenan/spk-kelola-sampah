@@ -7,17 +7,41 @@
 
 @php
 
-    $heads = [
-        ['label' => 'No', 'width' => 4],
-        'Nama Jenis',
-        'Sumber',
-        ['label' => 'Actions', 'no-export' => true, 'width' => 5],
-    ];
+    $heads = ['id', 'Nama Jenis', 'Sumber', ['label' => 'Actions', 'no-export' => true, 'width' => 5]];
 
     $config = [
-        'data' => array_map('array_values', json_decode($jenisSampah, true)),
+        'data' => array_map(function ($v) {
+            if (Auth::user()->role === 'staff') {
+                $v['actions'] =
+                    '<nobr>
+                    <button class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit" 
+                        data-toggle="modal" data-target="#editJenisSampah"
+                        onclick="$(\'#editJenisSampahForm\').attr(\'action\', \'/jenis-sampah/' .
+                    $v['id'] .
+                    '\'); $(\'#editJenisSampahNama\').val(\'' .
+                    $v['nama'] .
+                    '\'); $(\'#editJenisSampahSumber\').val(\'' .
+                    $v['sumber_sampah'] .
+                    '\');">
+                        <i class="fa fa-lg fa-fw fa-pen"></i>
+                    </button>
+                    <button class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete"
+                        data-toggle="modal" data-target="#deleteJenisSampah" 
+                        onclick="$(\'#deleteJenisSampahForm\').attr(\'action\', \'/jenis-sampah/' .
+                    $v['id'] .
+                    '\'); $(\'#deleteJenisSampahNama\').text(\'' .
+                    $v['nama'] .
+                    '\');">
+                        <i class="fa fa-lg fa-fw fa-trash"></i>
+                    </button>
+                </nobr>';
+            } else {
+                $v['actions'] = ' ';
+            }
+            return array_values($v);
+        }, json_decode($jenisSampah, true)),
         'order' => [[0, 'asc']],
-        'columns' => [null, null, null],
+        'columns' => [null, null, null, null],
     ];
 @endphp
 
@@ -94,6 +118,9 @@
             <div class="col-12">
                 <x-adminlte-datatable id="table1" :heads="$heads" :config="$config" theme="light" striped hoverable
                     bordered with-buttons class="border border-black rounded">
+                </x-adminlte-datatable>
+                {{-- <x-adminlte-datatable id="table1" :heads="$heads" :config="$config" theme="light" striped hoverable
+                    bordered with-buttons class="border border-black rounded">
                     @foreach ($config['data'] as $item)
                         <tr>
                             @foreach ($item as $key => $value)
@@ -123,7 +150,7 @@
 
                         </tr>
                     @endforeach
-                </x-adminlte-datatable>
+                </x-adminlte-datatable> --}}
             </div>
         </div>
 
@@ -133,11 +160,13 @@
                 @csrf
                 <div class="form-group">
                     <label for="nama">Nama Jenis</label>
-                    <input type="text" class="form-control" id="nama" name="nama">
+                    <input type="text" class="form-control" id="nama" name="nama"
+                        placeholder="Masukkan nama jenis sampah.">
                 </div>
                 <div class="form-group">
                     <label for="sumber_sampah">Sumber</label>
-                    <textarea name="sumber_sampah" id="sumber_sampah" class="form-control"></textarea>
+                    <textarea name="sumber_sampah" id="sumber_sampah" class="form-control"
+                        placeholder="Masukkan tempat darimana sampah berasal."></textarea>
                 </div>
                 <x-slot name="footerSlot">
                     <button id="createJenisSampahButton" type="button" class="btn btn-primary"
@@ -154,11 +183,13 @@
                 @method('PUT')
                 <div class="form-group">
                     <label for="nama">Nama Jenis</label>
-                    <input type="text" class="form-control" id="editJenisSampahNama" name="nama">
+                    <input type="text" class="form-control" id="editJenisSampahNama" name="nama"
+                        placeholder="Masukkan nama jenis sampah.">
                 </div>
                 <div class="form-group">
                     <label for="sumber_sampah">Sumber</label>
-                    <textarea name="sumber_sampah" id="editJenisSampahSumber" class="form-control"></textarea>
+                    <textarea name="sumber_sampah" id="editJenisSampahSumber" class="form-control"
+                        placeholder="Masukkan tempat darimana sampah berasal."></textarea>
                 </div>
                 <x-slot name="footerSlot">
                     <button id="editJenisSampahButton" type="button" class="btn btn-primary"

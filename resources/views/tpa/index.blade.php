@@ -13,7 +13,7 @@
         ->toArray();
 
     $heads = [
-        ['label' => 'No', 'width' => 4],
+        ['label' => 'ID', 'width' => 4],
         ['label' => 'Nama TPA', 'width' => 10],
         ['label' => 'Alamat', 'width' => 10],
         ['label' => 'Kontak', 'width' => 10],
@@ -24,17 +24,67 @@
     array_splice($heads, 5, 0, $kriteriasHeads);
 
     $config = [
-        'data' => array_map('array_values', json_decode($tpas, true)),
+        'data' => array_map(function ($v) {
+            // Store original data for modal
+            $originalData = $v;
+
+            // Process data for table display
+            $v['jenis_sampah'] = implode(', ', array_column($v['jenis_sampah'], 'nama'));
+
+            $kriteria_values = array_values(
+                array_map(function ($k) {
+                    return $k['pivot']['nilai'];
+                }, $v['kriterias']),
+            );
+
+            // Remove kriterias after using it
+            unset($v['kriterias']);
+
+            // Add kriterias values
+            $v = array_merge($v, $kriteria_values);
+
+            // Add actions as last column if user is staff
+            if (Auth::user()->role === 'staff') {
+                $v['actions'] =
+                    '<nobr>
+                    <button class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit" data-toggle="modal" data-target="#editTPA" 
+                        data-id="' .
+                    $v['id'] .
+                    '"
+                        data-nama="' .
+                    $v['nama'] .
+                    '"
+                        data-alamat="' .
+                    $v['alamat'] .
+                    '"
+                        data-kontak="' .
+                    $v['kontak'] .
+                    '"
+                        data-jenis-sampah=\'' .
+                    json_encode($originalData['jenis_sampah']) .
+                    '\'
+                        data-kriterias=\'' .
+                    json_encode($originalData['kriterias']) .
+                    '\'
+                    >
+                        <i class="fa fa-lg fa-fw fa-pen"></i>
+                    </button>
+                    <button class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete" data-toggle="modal" data-target="#deleteTPA" onclick="$(\'#deleteTPAForm\').attr(\'action\', \'/tpa/' .
+                    $v['id'] .
+                    '\'); $(\'#deleteTPANama\').text(\'' .
+                    $v['nama'] .
+                    '\');">
+                        <i class="fa fa-lg fa-fw fa-trash"></i>
+                    </button>
+                </nobr>';
+            } else {
+                $v['actions'] = '';
+            }
+
+            return array_values($v);
+        }, json_decode($tpas, true)),
         'order' => [[0, 'asc']],
-        'columns' => [null, null, null, null, null],
-        'columnDefs' => [
-            [
-                'targets' => [-1],
-                'className' => 'text-center',
-                'data' => null,
-                'orderable' => false,
-            ],
-        ],
+        'columns' => array_fill(0, count($heads), null),
     ];
 
 @endphp
@@ -110,7 +160,7 @@
             @endif
 
             <div class="col-12">
-                <x-adminlte-datatable id="tpaTable" :heads="$heads" :config="$config" theme="light" striped hoverable
+                {{-- <x-adminlte-datatable id="tpaTable" :heads="$heads" :config="$config" theme="light" striped hoverable
                     bordered class="border border-black rounded">
                     @foreach ($config['data'] as $item)
                         <tr>
@@ -141,7 +191,6 @@
                                             $('#editTPANama').val('{{ $item[1] }}');
                                             $('#editTPAAlamat').val(`{{ $item[2] }}`);
                                             $('#editTPAKontak').val('{{ $item[3] }}');
-                                            // Populate jenisSampahContainer with readonly input for each item[5] and add delete button
                                             var jenisSampahHtml = '';
                                             @php $jenisSampahArr = $item[4]; @endphp
                                             @foreach ($jenisSampahArr as $idx => $js)
@@ -156,7 +205,6 @@
                                                     </div>
                                                 </div>
                                             `; @endforeach
-                                            // insert value to all kriteria
                                             var kriteriaList = {{ json_encode($item[5]) }};
                                             $.each(kriteriaList, function(key, value) {
                                                 var kriteriaId = value['id'];
@@ -165,7 +213,6 @@
                                             });
                                             $('#jenisSampahContainer').html(jenisSampahHtml);
                                         ">
-                                            {{-- {{ dd($item[5], 'okee') }} --}}
                                             <i class="fa fa-lg fa-fw fa-pen"></i>
                                         </button>
                                         <button class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete"
@@ -178,6 +225,9 @@
                             </td>
                         </tr>
                     @endforeach
+                </x-adminlte-datatable> --}}
+                <x-adminlte-datatable id="tpaTable" :heads="$heads" :config="$config" theme="light" striped hoverable
+                    bordered with-buttons class="border border-black rounded">
                 </x-adminlte-datatable>
             </div>
         </div>
@@ -188,15 +238,17 @@
                 @csrf
                 <div class="form-group">
                     <label for="nama">Nama TPA</label>
-                    <input type="text" class="form-control" id="nama" name="nama">
+                    <input type="text" class="form-control" id="nama" name="nama"
+                        placeholder="Masukkan nama tempat pembuangan akhir (TPA/TPS).">
                 </div>
                 <div class="form-group">
                     <label for="alamat">Alamat</label>
-                    <textarea name="alamat" id="alamat" class="form-control"></textarea>
+                    <textarea name="alamat" id="alamat" class="form-control" placeholder="Masukkan alamat lengkap lokasi dari TPA/TPS."></textarea>
                 </div>
                 <div class="form-group">
                     <label for="kontak">Kontak</label>
-                    <input type="tel" class="form-control" id="kontak" name="kontak">
+                    <input type="tel" class="form-control" id="kontak" name="kontak"
+                        placeholder="Masukkan nomor telepon yang bisa dihubungi.">
                 </div>
                 <div class="form-group">
                     <label for="jenis_sampah">Jenis Sampah</label>
@@ -254,7 +306,9 @@
                     <div class="form-group">
                         <label for="{{ $krit->id }}">{{ $krit->label . ' (' . $krit->satuan_ukur . ')' }}</label>
                         <input type="number" class="form-control" id="{{ $krit->id }}"
-                            name="kriterias[{{ $krit->id }}]">
+                            name="kriterias[{{ $krit->id }}]"
+                            placeholder="Masukkan nilai kriteria. ({{ $krit->satuan_ukur }})" step="0.1"
+                            min="0">
                     </div>
                 @endforeach
                 <x-slot name="footerSlot">
@@ -272,15 +326,18 @@
                 @method('PUT')
                 <div class="form-group">
                     <label for="nama">Nama TPA</label>
-                    <input type="text" class="form-control" id="editTPANama" name="nama">
+                    <input type="text" class="form-control" id="editTPANama" name="nama"
+                        placeholder="Masukkan nama tempat pembuangan akhir (TPA/TPS).">
                 </div>
                 <div class="form-group">
                     <label for="alamat">Alamat</label>
-                    <textarea name="alamat" id="editTPAAlamat" class="form-control"></textarea>
+                    <textarea name="alamat" id="editTPAAlamat" class="form-control"
+                        placeholder="Masukkan alamat lengkap lokasi dari TPA/TPS."></textarea>
                 </div>
                 <div class="form-group">
                     <label for="kontak">Kontak</label>
-                    <input type="tel" class="form-control" id="editTPAKontak" name="kontak">
+                    <input type="tel" class="form-control" id="editTPAKontak" name="kontak"
+                        placeholder="Masukkan nomor telepon yang bisa dihubungi.">
                 </div>
                 <div class="form-group">
                     <label for="jenis_sampah">Jenis Sampah</label>
@@ -335,7 +392,8 @@
                     <div class="form-group">
                         <label for="{{ $krit->id }}">{{ $krit->label . ' (' . $krit->satuan_ukur . ')' }}</label>
                         <input type="number" class="form-control" id="{{ 'editTPA' . $krit->id }}"
-                            name="kriterias[{{ $krit->id }}]">
+                            name="kriterias[{{ $krit->id }}]"
+                            placeholder="Masukkan nilai kriteria. ({{ $krit->satuan_ukur }})" step="0.1">
                     </div>
                 @endforeach
                 <x-slot name="footerSlot">
@@ -361,4 +419,87 @@
             </form>
         </x-adminlte-modal>
     </div>
+@endsection
+
+@section('js')
+    <script>
+        $(document).ready(function() {
+            // Function to load data into modal
+            function loadModalData(button) {
+                var id = button.data('id');
+                var nama = button.data('nama');
+                var alamat = button.data('alamat');
+                var kontak = button.data('kontak');
+                var jenisSampah = button.data('jenis-sampah');
+                var kriterias = button.data('kriterias');
+
+                var form = $('#editTPAForm');
+                form.attr('action', '/tpa/' + id);
+                $('#editTPANama').val(nama);
+                $('#editTPAAlamat').val(alamat);
+                $('#editTPAKontak').val(kontak);
+
+                // Load jenis sampah
+                var jenisSampahHtml = '';
+                if (jenisSampah && jenisSampah.length > 0) {
+                    jenisSampah.forEach(function(js) {
+                        jenisSampahHtml += `
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control" readonly value="${js.nama}">
+                                <input type="hidden" name="jenis_sampah[]" value="${js.id}">
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="$(this).closest('.input-group').remove();">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                $('#jenisSampahContainer').html(jenisSampahHtml);
+
+                // Load kriterias
+                if (kriterias && kriterias.length > 0) {
+                    kriterias.forEach(function(k) {
+                        $('#editTPA' + k.id).val(k.pivot.nilai);
+                    });
+                }
+            }
+
+            // Show modal event
+            $('#editTPA').on('show.bs.modal', function(event) {
+                var button = $(event.relatedTarget);
+                loadModalData(button);
+            });
+
+            // Reset form when modal is hidden
+            $('#editTPA').on('hidden.bs.modal', function() {
+                $('#editTPAForm')[0].reset();
+                $('#jenisSampahContainer').empty();
+                $('input[id^="editTPA"]').val('');
+            });
+
+            // Handle form submission
+            $('#editTPAForm').on('submit', function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var url = form.attr('action');
+
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: form.serialize(),
+                    success: function(response) {
+                        $('#editTPA').modal('hide');
+                        // Reload the page to show updated data
+                        window.location.reload();
+                    },
+                    error: function(xhr) {
+                        console.error('Error:', xhr);
+                        alert('An error occurred while saving the data.');
+                    }
+                });
+            });
+        });
+    </script>
 @endsection

@@ -55,7 +55,7 @@
             </div>
             <div class="col-12">
                 <x-adminlte-datatable id="table1" :heads="$heads" :config="$config" theme="light" striped hoverable
-                    bordered class="border border-black rounded">
+                    bordered with-buttons class="border border-black rounded">
                 </x-adminlte-datatable>
             </div>
         </div>
@@ -100,17 +100,17 @@
                                 </thead>
                                 <tbody id="keputusanModalTableBody">
                                     ${response.map(item => `
-            <tr>
-                <td class="text-center">#${item.rank}</td>
-                <td class="text-center">${item.nama}</td>
-                <td class="text-center">${item.skor}</td>
-                <td class="text-center">
-                    <button type="button" class="btn btn-xs btn-default text-primary showDetail" data-toggle="modal" data-target="#resultDetailModal" data-hasil-keputusan-id="${item.id}" onclick="$('#keputusanModal').modal('hide')">
-                        <i class="fa fa-lg fa-fw fa-receipt"></i>
-                    </button>
-                </td>
-            </tr>
-        `).join('')}
+                <tr>
+                    <td class="text-center">#${item.rank}</td>
+                    <td class="text-center">${item.nama}</td>
+                    <td class="text-center">${item.skor}</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-xs btn-default text-primary showDetail" data-toggle="modal" data-target="#resultDetailModal" data-hasil-keputusan-id="${item.id}" onclick="$('#keputusanModal').modal('hide')">
+                            <i class="fa fa-lg fa-fw fa-receipt"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('')}
                                 </tbody>
                             </table>
                         `);
