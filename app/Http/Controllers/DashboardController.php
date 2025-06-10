@@ -10,11 +10,11 @@ class DashboardController extends Controller
 {
     public function fivedayssampah()
     {
-        $fiveDaysAgo = now()->subDays(5)->startOfDay();
+        $sevenDaysAgo = now()->subDays(7)->startOfDay();
 
-        // Get weights data for last 5 days
+        // Get weights data for last 7 days
         $dailyWeights = \App\Models\HasilKeputusan::where('rank', 1)
-            ->where('created_at', '>=', $fiveDaysAgo)
+            ->where('created_at', '>=', $sevenDaysAgo)
             ->selectRaw('DATE(created_at) as date, SUM(jumlah_sampah) as total_weight')
             ->groupBy('date')
             ->orderBy('date')
@@ -26,7 +26,7 @@ class DashboardController extends Controller
         // Fill in missing dates with 0
         $dates = [];
         $totals = [];
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 7; $i++) {
             $date = now()->subDays($i)->format('Y-m-d');
             $formattedDate = \Carbon\Carbon::parse($date)->locale('id')->translatedFormat('d M');
             $dates[] = $formattedDate;

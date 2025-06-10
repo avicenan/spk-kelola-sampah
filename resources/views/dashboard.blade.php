@@ -20,7 +20,7 @@
                                     <div class="card-body">
                                         <div class="d-flex flex-column">
                                             <h5 class="card-title">Sampah Serela Hotel</h5>
-                                            <small class="text-muted">5 hari terakhir (dalam kg)</small>
+                                            <small class="text-muted">7 hari terakhir (dalam kg)</small>
                                         </div>
                                         <div style="position: relative; height: 200px;">
                                             <canvas id="weightChart"></canvas>
@@ -180,25 +180,18 @@
             </div>
             <div class="col-12">
                 <div class="row">
-                    @foreach ($topTPA as $item)
-                        <div class="col-md-2">
-                            <div class="card border">
-                                <div class="card-header">
-                                    <h6 class="mb-0 text-truncate" style="max-width: 150px;">{{ $item->nama }}</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h2 class="mb-0">{{ $item->total_wins }}x</h2>
-                                            <small>Terpilih</small>
-                                            <div class="text-muted mt-1">Total: {{ $item->total_weight }} kg</div>
-                                        </div>
-                                        <i class="fas fa-recycle fa-2x text-success"></i>
-                                    </div>
+                    <div class="col-12">
+                        <div class="card border">
+                            <div class="card-header">
+                                <h3 class="card-title">Top TPA Berdasarkan Jumlah Terpilih</h3>
+                            </div>
+                            <div class="card-body">
+                                <div style="position: relative; height: 300px;">
+                                    <canvas id="tpaChart"></canvas>
                                 </div>
                             </div>
                         </div>
-                    @endforeach
+                    </div>
                 </div>
             </div>
         </div>
@@ -307,6 +300,59 @@
                                     const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                     const percentage = Math.round((value / total) * 100);
                                     return `${context.label}: ${value} kg (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // TPA Chart
+            var tpaCtx = document.getElementById('tpaChart').getContext('2d');
+            var tpaData = @json($topTPA);
+
+            var tpaChart = new Chart(tpaCtx, {
+                type: 'bar',
+                data: {
+                    labels: tpaData.map(item => item.nama),
+                    datasets: [{
+                        label: 'Jumlah Terpilih',
+                        data: tpaData.map(item => item.total_wins),
+                        backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        borderRadius: 5,
+                        barThickness: 30
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const tpa = tpaData[context.dataIndex];
+                                    return [
+                                        `Terpilih: ${context.raw}x`,
+                                        `Total Sampah: ${tpa.total_weight} kg`
+                                    ];
                                 }
                             }
                         }

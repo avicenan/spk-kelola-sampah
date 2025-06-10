@@ -56,6 +56,20 @@
             @enderror
         </div>
 
+        {{-- Role field --}}
+        <div class="input-group mb-3">
+            <select name="role" class="form-control">
+                <option value="staff" selected>Staff</option>
+                <option value="kepala_divisi">Kepala Divisi</option>
+            </select>
+
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-user-tag {{ config('adminlte.classes_auth_icon', '') }}"></span>
+                </div>
+            </div>
+        </div>
+
         {{-- Password field --}}
         <div class="input-group mb-3">
             <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
