@@ -29,7 +29,13 @@ class KeputusanController extends Controller
         $keputusans = Keputusan::orderBy('id', 'desc')->get(['id', 'created_at', 'judul', 'keterangan']);
         $hasilKeputusans = HasilKeputusan::orderBy('id', 'asc')->limit(10)->get();
         $jenisSampahs = JenisSampah::all(['id', 'nama']);
-        return view('keputusan.index', compact('keputusans', 'jenisSampahs'));
+        $tpas = TPA::with([
+            'kriterias' => function ($query) {
+                $query->select('kriterias.id', 'label', 'nama', 'satuan_ukur');
+            }
+        ])->orderBy('tpa.id', 'asc')->get(['tpa.id', 'tpa.nama']);
+        $kriterias = Kriteria::get(['id', 'label', 'nama', 'satuan_ukur']);
+        return view('keputusan.index', compact('keputusans', 'jenisSampahs', 'tpas', 'kriterias'));
     }
 
     public function create()
@@ -41,27 +47,22 @@ class KeputusanController extends Controller
     {
         $request->validate([
             'jenis_sampah_id' => 'required|exists:jenis_sampah,id',
-            'biaya' => 'required|numeric|min:0',
-            'tingkat_kemacetan' => 'required|in:1,2,3,4,5',
-            'from' => 'required|date',
-            'to' => 'required|date',
             'jumlah_sampah' => 'required|numeric|min:0',
+            'from' => 'required|date|before:to',
+            'to' => 'required|date|after:from',
+            'tpa_kriteria' => 'required|array',
+            'tpa_kriteria.*' => 'required|array',
+            'tpa_kriteria.*.*' => 'required|numeric|min:0',
         ]);
 
         try {
             // 1. Ambil data TPA atau Alternatif
             $alternatifs = JenisSampah::find($request->jenis_sampah_id)->tpas;
 
-            // 2. Ambil nilai tetap dari request
-            $nilaiTetap = [
-                'biaya' => $request->biaya,
-                'tingkat_kemacetan' => $request->tingkat_kemacetan
-            ];
-
-            // 3. Definisikan kriteria dan bobot
+            // 2. Definisikan kriteria dan bobot
             $kriterias = Kriteria::all(['id', 'nama', 'sifat', 'bobot']);
 
-            // 4. Bangun nilai alternatif
+            // 3. Bangun nilai alternatif
             $nilaiAlternatif = [];
 
             foreach ($alternatifs as $alt) {
@@ -69,20 +70,14 @@ class KeputusanController extends Controller
 
                 foreach ($kriterias as $k) {
                     $nama = $k->nama;
-
-                    if (array_key_exists($nama, $nilaiTetap)) {
-                        // dari form request, semua alternatif nilainya sama
-                        $data[$nama] = $nilaiTetap[$nama];
-                    } else {
-                        // dari tpa_kriteria pivot table
-                        $data[$nama] = $alt->kriterias()->firstWhere('nama', $nama)->pivot->nilai ?? 0;
-                    }
+                    $nilai = $request->tpa_kriteria[$alt->id][$k->id] ?? 0;
+                    $data[$nama] = $nilai;
                 }
 
                 $nilaiAlternatif[$alt->id] = $data;
             }
 
-            // 5. Normalisasi
+            // 4. Normalisasi
             $normalisasi = [];
             foreach ($kriterias as $krit) {
                 $nama = $krit['nama'];
@@ -101,7 +96,7 @@ class KeputusanController extends Controller
                 }
             }
 
-            // 6. Hitung skor akhir
+            // 5. Hitung skor akhir
             $hasil = [];
             foreach ($normalisasi as $altId => $row) {
                 $skor = 0;
@@ -116,20 +111,17 @@ class KeputusanController extends Controller
                 ];
             }
 
-            // 7. Urutkan dari skor tertinggi
+            // 6. Urutkan dari skor tertinggi
             $hasil = collect($hasil)->sortByDesc('skor')->values();
 
-            // 8. View Keputusan
-            $hasil = $hasil->map(function ($item, $index) use ($alternatifs, $nilaiTetap, $request) {
+            // 7. View Keputusan
+            $hasil = $hasil->map(function ($item, $index) use ($alternatifs, $request, $normalisasi, $nilaiAlternatif, $kriterias) {
                 $alternatif = $alternatifs->find($item['alternatif_id']);
                 $item['view'] = [
                     'rank' => $index + 1,
                     'nama' => $alternatif->nama,
                     'alamat' => $alternatif->alamat,
                     'kontak' => $alternatif->kontak,
-                    'jarak' => $alternatif->kriterias()->firstWhere('nama', 'jarak')->pivot->nilai,
-                    'biaya' => $nilaiTetap['biaya'],
-                    'tingkat_kemacetan' => $nilaiTetap['tingkat_kemacetan'],
                     'jenis_sampah' => JenisSampah::find($request->jenis_sampah_id)->nama,
                     'sumber_sampah' => JenisSampah::find($request->jenis_sampah_id)->sumber_sampah,
                     'from' => $request->from,
@@ -140,6 +132,9 @@ class KeputusanController extends Controller
                     'role' => Auth::user()->role,
                     'created_at' => now()
                 ];
+                $item['normalisasi'] = $normalisasi[$alternatif->id];
+                $item['nilaiAlternatif'] = $nilaiAlternatif[$alternatif->id];
+                $item['kriterias'] = $kriterias;
                 return $item;
             });
 

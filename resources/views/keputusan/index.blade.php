@@ -31,6 +31,60 @@
 
 @section('js')
     @include('keputusan.script')
+    <script>
+        $(document).ready(function() {
+            $('#calculate').click(function() {
+                // Get form data
+                var formData = new FormData($('#keputusanForm')[0]);
+
+                // Add TPA criteria values
+                $('input[name^="tpa_kriteria"]').each(function() {
+                    formData.append($(this).attr('name'), $(this).val());
+                });
+
+                // Send AJAX request
+                $.ajax({
+                    url: $('#keputusanForm').attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        // Handle success response
+                        if (response.length > 0) {
+                            // Update result modal with response data
+                            var resultHtml = '';
+                            response.forEach(function(item) {
+                                resultHtml += `
+                                    <tr>
+                                        <td>${item.view.rank}</td>
+                                        <td>${item.view.nama}</td>
+                                        <td>${item.view.alamat}</td>
+                                        <td>${item.view.kontak}</td>
+                                        <td>${item.view.jenis_sampah}</td>
+                                        <td>${item.view.jumlah_sampah} kg</td>
+                                        <td>${item.skor}%</td>
+                                    </tr>
+                                `;
+                            });
+                            $('#resultTableBody').html(resultHtml);
+                            $('#resultModal').modal('show');
+                        }
+                    },
+                    error: function(xhr) {
+                        // Handle error response
+                        var errorMessage = xhr.responseJSON?.message ||
+                            'Terjadi kesalahan saat menghitung keputusan';
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: errorMessage
+                        });
+                    }
+                });
+            });
+        });
+    </script>
 @endsection
 
 @section('content')
@@ -97,18 +151,29 @@
             <div class="col-12">
                 <h1 class="h3 mb-4 text-gray-800 font-weight-bold">Keputusan</h1>
                 <h2 class="h5 mb-2 text-gray-800 font-weight-bold">Form Keputusan</h2>
-                <form method="POST" class="p-2 bg-white border mb-4">
+                <form method="POST" action="{{ route('keputusan.calculate') }}" class="p-2 bg-white border mb-4"
+                    id="keputusanForm">
                     @csrf
-                    <div class="col-8">
-                        {{-- Jenis Sampah --}}
-                        <div class="form-group">
-                            <label for="jenis_sampah_id">Jenis Sampah</label>
-                            <select name="jenis_sampah_id" id="" class="form-control">
-                                <option selected disabled>--- Pilih Jenis Sampah ---</option>
-                                @foreach ($jenisSampahs as $jenis)
-                                    <option value="{{ $jenis->id }}">{{ $jenis->nama }}</option>
-                                @endforeach
-                            </select>
+                    <div class="col-12">
+                        <div class="row m-0">
+                            {{-- Jenis Sampah --}}
+                            <div class="form-group col-6 p-0">
+                                <label for="jenis_sampah_id">Jenis Sampah</label>
+                                <select name="jenis_sampah_id" id="" class="form-control">
+                                    <option selected disabled>--- Pilih Jenis Sampah ---</option>
+                                    @foreach ($jenisSampahs as $jenis)
+                                        <option value="{{ $jenis->id }}">{{ $jenis->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            {{-- Jumlah Sampah --}}
+                            <div class="form-group col-6">
+                                <label for="jumlah_sampah">Jumlah Sampah <span class="text-muted font-weight-normal">(dalam
+                                        kg)</span></label>
+                                <input type="number" class="form-control" id="jumlah_sampah" name="jumlah_sampah"
+                                    placeholder="Masukkan jumlah sampah dalam kg">
+                            </div>
                         </div>
 
                         {{-- Periode Sampah --}}
@@ -116,7 +181,10 @@
                             <label>Periode Sampah</label>
                             <div class="row m-0">
                                 @php
-                                    $inputDateConfig = ['format' => 'DD-MM-YYYY'];
+                                    $inputDateConfig = [
+                                        'format' => 'DD-MM-YYYY',
+                                        'minDate' => 'js:moment().startOf("day")',
+                                    ];
                                 @endphp
                                 <x-adminlte-input-date name="from" :config="$inputDateConfig" placeholder="Pilih tanggal awal...">
                                     <x-slot name="appendSlot">
@@ -135,27 +203,50 @@
                                     </x-slot>
                                 </x-adminlte-input-date>
                             </div>
-
                         </div>
 
-                        {{-- Jumlah Sampah --}}
+                        {{-- TPA Table --}}
                         <div class="form-group">
-                            <label for="jumlah_sampah">Jumlah Sampah <span class="text-muted font-weight-normal">(dalam
-                                    kg)</span></label>
-                            <input type="number" class="form-control" id="jumlah_sampah" name="jumlah_sampah"
-                                placeholder="Masukkan jumlah sampah dalam kg">
+                            <label>Daftar TPA dan Kriteria</label>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama TPA</th>
+                                            @foreach ($kriterias as $kriteria)
+                                                <th>{{ $kriteria->label }} ({{ $kriteria->satuan_ukur }})</th>
+                                            @endforeach
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($tpas as $tpa)
+                                            <tr>
+                                                <td>{{ $tpa->nama }}</td>
+                                                @foreach ($kriterias as $kriteria)
+                                                    <td>
+                                                        <input type="number" class="form-control form-control-sm"
+                                                            name="tpa_kriteria[{{ $tpa->id }}][{{ $kriteria->id }}]"
+                                                            value="{{ $tpa->kriterias->where('id', $kriteria->id)->first()->pivot->nilai ?? 0 }}"
+                                                            step="0.01" min="0">
+                                                    </td>
+                                                @endforeach
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                         {{-- Biaya --}}
-                        <div class="form-group">
+                        {{-- <div class="form-group">
                             <label for="biaya">Biaya <span class="text-muted font-weight-normal">(dalam
                                     rupiah)</span></label>
                             <input type="number" class="form-control" id="biaya" name="biaya"
                                 placeholder="Masukkan biaya pembuangan dan pengangkutan sampah">
-                        </div>
+                        </div> --}}
 
                         {{-- Tingkat Kemacetan --}}
-                        <div class="form-group">
+                        {{-- <div class="form-group">
                             <label for="tingkat_kemacetan">Tingkat Kemacetan <span
                                     class="text-muted font-weight-normal">(dari 1 hingga 5)</span></label>
                             <select class="form-control" id="tingkat_kemacetan" name="tingkat_kemacetan">
@@ -166,7 +257,7 @@
                                 <option value="4">4 - Sedang</option>
                                 <option value="5">5 - Macet</option>
                             </select>
-                        </div>
+                        </div> --}}
 
                         {{-- Submit Button --}}
                         <div class="form-group">
