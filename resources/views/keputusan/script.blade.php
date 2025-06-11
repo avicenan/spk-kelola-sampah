@@ -32,120 +32,131 @@
     // Show result detail data in modal
     function showDetail(id) {
         const hasil = hasils[id];
+
+        // Create criteria section HTML only if kriterias exist
+        let criteriaSection = '';
+        if (hasil.kriterias && hasil.kriterias.length > 0) {
+            criteriaSection = `
+                <!-- Criteria Information Section -->
+                <div class="card mb-3">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0 font-weight-bold">Nilai Kriteria</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            ${hasil.kriterias.map(k => `
+                                <div class="col-md-6 mb-2">
+                                    <div class="font-weight-bold">${k.label || k.nama}:</div>
+                                    <div>${hasil.nilaiAlternatif[k.nama]} (${k.satuan_ukur || ''})</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
         $('#resultDetailModalContainer').html(`
-                                        <div class="text-center">
-                                            <h4 class='font-weight-bold'> Hasil Keputusan</h4>
-                                            <p>Serela Hotel Cihampelas</p>
-                                        </div>
+            <div class="text-center">
+                <h4 class='font-weight-bold'> Hasil Keputusan</h4>
+                <p>Serela Hotel Cihampelas</p>
+            </div>
 
-                                        <!-- TPA Information Section -->
-                                        <div class="card mb-3">
-                                            <div class="card-header bg-light">
-                                                <h6 class="mb-0 font-weight-bold">Informasi TPA</h6>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class=" mb-2">
-                                                            <div class="font-weight-bold">Nama TPA:</div>
-                                                            <div>${hasil.view.nama}</div>
-                                                        </div>
-                                                        <div class=" mb-2">
-                                                            <div class="font-weight-bold">Alamat:</div>
-                                                            <div>${hasil.view.alamat}</div>
-                                                        </div>
-                                                        <div class=" mb-2">
-                                                            <div class="font-weight-bold">Kontak:</div>
-                                                            <div>${hasil.view.kontak}</div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class=" mb-2">
-                                                            <div class="font-weight-bold">Rank:</div>
-                                                            <div><span class="badge badge-primary">${hasil.view.rank}</span></div>
-                                                        </div>
-                                                        <div class=" mb-2">
-                                                            <div class="font-weight-bold">Jarak:</div>
-                                                            <div>${hasil.view.jarak} km</div>
-                                                        </div>
-                                                        <div class=" mb-2">
-                                                            <div class="font-weight-bold">Biaya:</div>
-                                                            <div>Rp ${parseFloat(hasil.view.biaya).toLocaleString('id-ID')}</div>
-                                                        </div>
-                                                        <div class=" mb-2">
-                                                            <div class="font-weight-bold">Tingkat Kemacetan:</div>
-                                                            <div>
-                                                                <span class="badge ${hasil.view.tingkat_kemacetan >= 1 && hasil.view.tingkat_kemacetan <= 2 ? 'badge-primary' : hasil.view.tingkat_kemacetan >= 3 && hasil.view.tingkat_kemacetan <= 4 ? 'badge-warning' : 'badge-danger'}">${hasil.view.tingkat_kemacetan} - ${hasil.view.tingkat_kemacetan >= 1 && hasil.view.tingkat_kemacetan <= 2 ? 'Kurang' : hasil.view.tingkat_kemacetan >= 3 && hasil.view.tingkat_kemacetan <= 4 ? 'Sedang' : 'Banyak'}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+            <!-- TPA Information Section -->
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0 font-weight-bold">Informasi TPA</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class=" mb-2">
+                                <div class="font-weight-bold">Nama TPA:</div>
+                                <div>${hasil.view.nama}</div>
+                            </div>
+                            <div class=" mb-2">
+                                <div class="font-weight-bold">Alamat:</div>
+                                <div>${hasil.view.alamat}</div>
+                            </div>
+                            <div class=" mb-2">
+                                <div class="font-weight-bold">Kontak:</div>
+                                <div>${hasil.view.kontak}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class=" mb-2">
+                                <div class="font-weight-bold">Rank:</div>
+                                <div><span class="badge badge-primary">${hasil.view.rank}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                                        <!-- Waste Information Section -->
-                                        <div class="card mb-3">
-                                            <div class="card-header bg-light">
-                                                <h6 class="mb-0 font-weight-bold">Informasi Sampah</h6>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class=" mb-2">
-                                                            <div class="font-weight-bold">Jenis Sampah:</div>
-                                                            <div>${hasil.view.jenis_sampah}</div>
-                                                        </div>
-                                                        <div class=" mb-2">
-                                                            <div class="font-weight-bold">Sumber Sampah:</div>
-                                                            <div>${hasil.view.sumber_sampah}</div>
-                                                        </div>
+            ${criteriaSection}
 
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class=" mb-2">
-                                                            <div class="font-weight-bold">Jumlah Sampah:</div>
-                                                            <div>${hasil.view.jumlah_sampah} kg</div>
-                                                        </div>
-                                                        <div class=" mb-2">
-                                                            <div class="font-weight-bold">Periode:</div>
-                                                            <div>${hasil.view.from} - ${hasil.view.to}</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+            <!-- Waste Information Section -->
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0 font-weight-bold">Informasi Sampah</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class=" mb-2">
+                                <div class="font-weight-bold">Jenis Sampah:</div>
+                                <div>${hasil.view.jenis_sampah}</div>
+                            </div>
+                            <div class=" mb-2">
+                                <div class="font-weight-bold">Sumber Sampah:</div>
+                                <div>${hasil.view.sumber_sampah}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class=" mb-2">
+                                <div class="font-weight-bold">Jumlah Sampah:</div>
+                                <div>${hasil.view.jumlah_sampah} kg</div>
+                            </div>
+                            <div class=" mb-2">
+                                <div class="font-weight-bold">Periode:</div>
+                                <div>${hasil.view.from} - ${hasil.view.to}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                                        <!-- User Information Section -->
-                                        <div class="card mb-3">
-                                            <div class="card-header bg-light">
-                                                <h6 class="mb-0 font-weight-bold">Informasi Pengguna</h6>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class=" mb-2">
-                                                            <div class="font-weight-bold">Nama:</div>
-                                                            <div>${hasil.view.nama_pengguna}</div>
-                                                        </div>
-                                                        <div class=" mb-2">
-                                                            <div class="font-weight-bold">Email:</div>
-                                                            <div>${hasil.view.email_pengguna}</div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class=" mb-2">
-                                                            <div class="font-weight-bold">Jabatan:</div>
-                                                            <div><span class="badge badge-info">${hasil.view.role}</span></div>
-                                                        </div>
-                                                        <div class=" mb-2">
-                                                            <div class="font-weight-bold">Tanggal:</div>
-                                                            <div>${new Date(hasil.view.created_at).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'  })}</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                `);
+            <!-- User Information Section -->
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0 font-weight-bold">Informasi Pengguna</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class=" mb-2">
+                                <div class="font-weight-bold">Nama:</div>
+                                <div>${hasil.view.nama_pengguna}</div>
+                            </div>
+                            <div class=" mb-2">
+                                <div class="font-weight-bold">Email:</div>
+                                <div>${hasil.view.email_pengguna}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class=" mb-2">
+                                <div class="font-weight-bold">Jabatan:</div>
+                                <div><span class="badge badge-info">${hasil.view.role}</span></div>
+                            </div>
+                            <div class=" mb-2">
+                                <div class="font-weight-bold">Tanggal:</div>
+                                <div>${new Date(hasil.view.created_at).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'  })}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `);
 
         $('#resultModal').modal('hide');
     }

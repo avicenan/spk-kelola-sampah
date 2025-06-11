@@ -49,7 +49,11 @@ class DashboardController extends Controller
 
     public function topFourJenisSampah()
     {
-        $result = \App\Models\HasilKeputusan::where('rank', 1)
+        // Get all active waste types
+        $allActiveTypes = JenisSampah::where('is_active', true)->pluck('nama')->toArray();
+
+        // Get top 4 by weight
+        $topByWeight = \App\Models\HasilKeputusan::where('rank', 1)
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->selectRaw('jenis_sampah, SUM(jumlah_sampah) as total_weight')
@@ -58,7 +62,22 @@ class DashboardController extends Controller
             ->limit(4)
             ->get();
 
-        return $result;
+        // If we have less than 4 types with data, fill with other active types
+        if ($topByWeight->count() < 4) {
+            $usedTypes = $topByWeight->pluck('jenis_sampah')->toArray();
+            $remainingTypes = array_diff($allActiveTypes, $usedTypes);
+
+            // Add remaining types with zero weight
+            foreach ($remainingTypes as $type) {
+                if ($topByWeight->count() >= 4) break;
+                $topByWeight->push((object)[
+                    'jenis_sampah' => $type,
+                    'total_weight' => 0
+                ]);
+            }
+        }
+
+        return $topByWeight;
     }
 
     public function topTPA()

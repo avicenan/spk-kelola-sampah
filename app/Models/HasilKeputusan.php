@@ -16,9 +16,6 @@ class HasilKeputusan extends Model
         'nama',
         'alamat',
         'kontak',
-        'jarak',
-        'biaya',
-        'tingkat_kemacetan',
         'jenis_sampah',
         'sumber_sampah',
         'from',
@@ -27,6 +24,7 @@ class HasilKeputusan extends Model
         'nama_pengguna',
         'email_pengguna',
         'role',
+        'kriterias',
     ];
 
     /**
@@ -39,10 +37,8 @@ class HasilKeputusan extends Model
         'to' => 'datetime',
         'skor' => 'float',
         'rank' => 'integer',
-        'jarak' => 'integer',
-        'biaya' => 'integer',
-        'tingkat_kemacetan' => 'integer',
         'jumlah_sampah' => 'integer',
+        'kriterias' => 'array',
     ];
 
     /**
@@ -59,9 +55,6 @@ class HasilKeputusan extends Model
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string',
             'kontak' => 'required|string|max:255',
-            'jarak' => 'required|integer|min:0',
-            'biaya' => 'required|integer|min:0',
-            'tingkat_kemacetan' => 'required|integer|in:1,2,3,4,5',
             'jenis_sampah' => 'required|string|max:255',
             'sumber_sampah' => 'required|string|max:255',
             'from' => 'required|date',

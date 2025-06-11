@@ -60,7 +60,7 @@ class KeputusanController extends Controller
             $alternatifs = JenisSampah::find($request->jenis_sampah_id)->tpas;
 
             // 2. Definisikan kriteria dan bobot
-            $kriterias = Kriteria::all(['id', 'nama', 'sifat', 'bobot']);
+            $kriterias = Kriteria::all(['id', 'nama', 'sifat', 'bobot', 'label', 'satuan_ukur']);
 
             // 3. Bangun nilai alternatif
             $nilaiAlternatif = [];
@@ -69,8 +69,8 @@ class KeputusanController extends Controller
                 $data = [];
 
                 foreach ($kriterias as $k) {
-                    $nama = $k->nama;
-                    $nilai = $request->tpa_kriteria[$alt->id][$k->id] ?? 0;
+                    $nama = $k['nama'];
+                    $nilai = $request->tpa_kriteria[$alt->id][$k['id']] ?? 0;
                     $data[$nama] = $nilai;
                 }
 
@@ -163,11 +163,21 @@ class KeputusanController extends Controller
                 $keputusan = Keputusan::create([
                     'user_id' => $user->id,
                     'judul' => $user->name . ' membuat keputusan baru',
-                    'keterangan' => 'Keputusan baru dihasilkan oleh ' . $user->name . ' untuk ' . $hasils[0]['view']['jenis_sampah'] . ' seberat ' . $hasils[0]['view']['jumlah_sampah'] . ' kg dengan biaya sebesar Rp ' . $hasils[0]['view']['biaya'] . ' Hasil: ' . $hasils[0]['view']['nama'],
+                    'keterangan' => 'Keputusan baru dihasilkan oleh ' . $user->name . ' untuk ' . $hasils[0]['view']['jenis_sampah'] . ' seberat ' . $hasils[0]['view']['jumlah_sampah'] . ' kg. Hasil: ' . $hasils[0]['view']['nama'],
                 ]);
 
                 // Create hasil keputusan records
                 $hasilKeputusanData = $hasils->map(function ($hasil) use ($keputusan) {
+                    // Prepare criteria values
+                    $kriteriaValues = [];
+                    foreach ($hasil['kriterias'] as $kriteria) {
+                        $kriteriaValues[$kriteria['nama']] = [
+                            'label' => $kriteria['label'],
+                            'satuan_ukur' => $kriteria['satuan_ukur'],
+                            'nilai' => $hasil['nilaiAlternatif'][$kriteria['nama']]
+                        ];
+                    }
+
                     return [
                         'keputusan_id' => $keputusan->id,
                         'skor' => $hasil['skor'],
@@ -175,9 +185,6 @@ class KeputusanController extends Controller
                         'nama' => $hasil['view']['nama'],
                         'alamat' => $hasil['view']['alamat'],
                         'kontak' => $hasil['view']['kontak'],
-                        'jarak' => $hasil['view']['jarak'],
-                        'biaya' => $hasil['view']['biaya'],
-                        'tingkat_kemacetan' => $hasil['view']['tingkat_kemacetan'],
                         'jenis_sampah' => $hasil['view']['jenis_sampah'],
                         'sumber_sampah' => $hasil['view']['sumber_sampah'],
                         'from' => \Carbon\Carbon::parse($hasil['view']['from'])->format('Y-m-d H:i:s'),
@@ -186,6 +193,7 @@ class KeputusanController extends Controller
                         'nama_pengguna' => $hasil['view']['nama_pengguna'],
                         'email_pengguna' => $hasil['view']['email_pengguna'],
                         'role' => $hasil['view']['role'],
+                        'kriterias' => json_encode($kriteriaValues),
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
@@ -199,7 +207,7 @@ class KeputusanController extends Controller
                     'user_id' => $user->id,
                     'keputusan_id' => $keputusan->id,
                     'jenis' => 'add_keputusan',
-                    'deskripsi' => '[' . $user->name . '] membuat keputusan baru untuk ' . $hasils[0]['view']['jenis_sampah'] . ' seberat ' . $hasils[0]['view']['jumlah_sampah'] . ' kg dengan biaya sebesar Rp ' . $hasils[0]['view']['biaya'] . ' Hasil: ' . $hasils[0]['view']['nama'],
+                    'deskripsi' => '[' . $user->name . '] membuat keputusan baru untuk ' . $hasils[0]['view']['jenis_sampah'] . ' seberat ' . $hasils[0]['view']['jumlah_sampah'] . ' kg. Hasil: ' . $hasils[0]['view']['nama'],
                 ]);
 
                 return response()->json([

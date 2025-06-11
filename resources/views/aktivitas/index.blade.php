@@ -100,17 +100,17 @@
                                 </thead>
                                 <tbody id="keputusanModalTableBody">
                                     ${response.map(item => `
-                <tr>
-                    <td class="text-center">#${item.rank}</td>
-                    <td class="text-center">${item.nama}</td>
-                    <td class="text-center">${item.skor}</td>
-                    <td class="text-center">
-                        <button type="button" class="btn btn-xs btn-default text-primary showDetail" data-toggle="modal" data-target="#resultDetailModal" data-hasil-keputusan-id="${item.id}" onclick="$('#keputusanModal').modal('hide')">
-                            <i class="fa fa-lg fa-fw fa-receipt"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('')}
+                                                    <tr>
+                                                        <td class="text-center">#${item.rank}</td>
+                                                        <td class="text-center">${item.nama}</td>
+                                                        <td class="text-center">${item.skor}</td>
+                                                        <td class="text-center">
+                                                            <button type="button" class="btn btn-xs btn-default text-primary showDetail" data-toggle="modal" data-target="#resultDetailModal" data-hasil-keputusan-id="${item.id}" onclick="$('#keputusanModal').modal('hide')">
+                                                                <i class="fa fa-lg fa-fw fa-receipt"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                `).join('')}
                                 </tbody>
                             </table>
                         `);
@@ -134,6 +134,36 @@
             }
             let hasil = keputusan.find(item => item.id === hasilKeputusanId);
             console.log(hasil);
+
+            // Parse criteria values safely
+            let kriterias = {};
+            try {
+                kriterias = typeof hasil.kriterias === 'string' ? JSON.parse(hasil.kriterias) : hasil.kriterias;
+            } catch (e) {
+                console.error('Error parsing criteria:', e);
+                kriterias = {};
+            }
+
+            // Split criteria into two columns
+            let criteriaEntries = Object.entries(kriterias);
+            let midPoint = Math.ceil(criteriaEntries.length / 2);
+            let leftColumn = criteriaEntries.slice(0, midPoint);
+            let rightColumn = criteriaEntries.slice(midPoint);
+
+            let leftColumnHtml = leftColumn.map(([key, value]) => `
+                <div class="mb-2">
+                    <div class="font-weight-bold">${value.label}:</div>
+                    <div>${value.nilai} (${value.satuan_ukur})</div>
+                </div>
+            `).join('');
+
+            let rightColumnHtml = rightColumn.map(([key, value]) => `
+                <div class="mb-2">
+                    <div class="font-weight-bold">${value.label}:</div>
+                    <div>${value.nilai} (${value.satuan_ukur})</div>
+                </div>
+            `).join('');
+
             $('#resultDetailModalContainer').html(`
                 <div class="text-center">
                     <h4 class='font-weight-bold'> Hasil Keputusan</h4>
@@ -148,38 +178,45 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <div class=" mb-2">
+                                <div class="mb-2">
                                     <div class="font-weight-bold">Nama TPA:</div>
                                     <div>${hasil.nama}</div>
                                 </div>
-                                <div class=" mb-2">
+                                <div class="mb-2">
                                     <div class="font-weight-bold">Alamat:</div>
                                     <div>${hasil.alamat}</div>
                                 </div>
-                                <div class=" mb-2">
+                                <div class="mb-2">
                                     <div class="font-weight-bold">Kontak:</div>
                                     <div>${hasil.kontak}</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class=" mb-2">
+                                <div class="mb-2">
                                     <div class="font-weight-bold">Rank:</div>
                                     <div><span class="badge badge-primary">${hasil.rank}</span></div>
                                 </div>
-                                <div class=" mb-2">
-                                    <div class="font-weight-bold">Jarak:</div>
-                                    <div>${hasil.jarak} km</div>
+                                <div class="mb-2">
+                                    <div class="font-weight-bold">Skor:</div>
+                                    <div>${hasil.skor}</div>
                                 </div>
-                                <div class=" mb-2">
-                                    <div class="font-weight-bold">Biaya:</div>
-                                    <div>Rp ${parseFloat(hasil.biaya).toLocaleString('id-ID')}</div>
-                                </div>
-                                <div class=" mb-2">
-                                    <div class="font-weight-bold">Tingkat Kemacetan:</div>
-                                    <div>
-                                        <span class="badge ${hasil.tingkat_kemacetan >= 1 && hasil.tingkat_kemacetan <= 2 ? 'badge-primary' : hasil.tingkat_kemacetan >= 3 && hasil.tingkat_kemacetan <= 4 ? 'badge-warning' : 'badge-danger'}">${hasil.tingkat_kemacetan} - ${hasil.tingkat_kemacetan >= 1 && hasil.tingkat_kemacetan <= 2 ? 'Kurang' : hasil.tingkat_kemacetan >= 3 && hasil.tingkat_kemacetan <= 4 ? 'Sedang' : 'Banyak'}</span>
-                                    </div>
-                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Criteria Information Section -->
+                <div class="card mb-3">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0 font-weight-bold">Informasi Kriteria</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                ${leftColumnHtml}
+                            </div>
+                            <div class="col-md-6">
+                                ${rightColumnHtml}
                             </div>
                         </div>
                     </div>
@@ -193,23 +230,23 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <div class=" mb-2">
+                                <div class="mb-2">
                                     <div class="font-weight-bold">Jenis Sampah:</div>
                                     <div>${hasil.jenis_sampah}</div>
                                 </div>
-                                <div class=" mb-2">
+                                <div class="mb-2">
                                     <div class="font-weight-bold">Sumber Sampah:</div>
                                     <div>${hasil.sumber_sampah}</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class=" mb-2">
+                                <div class="mb-2">
                                     <div class="font-weight-bold">Jumlah Sampah:</div>
                                     <div>${hasil.jumlah_sampah} kg</div>
                                 </div>
-                                <div class=" mb-2">
+                                <div class="mb-2">
                                     <div class="font-weight-bold">Periode:</div>
-                                    <div>${hasil.from} - ${hasil.to}</div>
+                                    <div>${new Date(hasil.from).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})} - ${new Date(hasil.to).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}) }</div>
                                 </div>
                             </div>
                         </div>
@@ -224,21 +261,21 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <div class=" mb-2">
+                                <div class="mb-2">
                                     <div class="font-weight-bold">Nama:</div>
                                     <div>${hasil.nama_pengguna}</div>
                                 </div>
-                                <div class=" mb-2">
+                                <div class="mb-2">
                                     <div class="font-weight-bold">Email:</div>
                                     <div>${hasil.email_pengguna}</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class=" mb-2">
+                                <div class="mb-2">
                                     <div class="font-weight-bold">Jabatan:</div>
                                     <div><span class="badge badge-info">${hasil.role}</span></div>
                                 </div>
-                                <div class=" mb-2">
+                                <div class="mb-2">
                                     <div class="font-weight-bold">Tanggal:</div>
                                     <div>${new Date(hasil.created_at).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'  })}</div>
                                 </div>

@@ -19,9 +19,6 @@ return new class extends Migration
             $table->string('nama');
             $table->text('alamat');
             $table->string('kontak');
-            $table->integer('jarak');
-            $table->integer('biaya');
-            $table->integer('tingkat_kemacetan');
             $table->string('jenis_sampah');
             $table->string('sumber_sampah');
             $table->date('from');
@@ -30,6 +27,7 @@ return new class extends Migration
             $table->string('nama_pengguna');
             $table->string('email_pengguna');
             $table->string('role');
+            $table->json('kriterias');
             // $table->datetime('created_at');
             $table->timestamps();
         });
