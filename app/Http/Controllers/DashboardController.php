@@ -52,24 +52,24 @@ class DashboardController extends Controller
         // Get all active waste types
         $allActiveTypes = JenisSampah::where('is_active', true)->pluck('nama')->toArray();
 
-        // Get top 4 by weight
+        // Get top by weight
         $topByWeight = \App\Models\HasilKeputusan::where('rank', 1)
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->selectRaw('jenis_sampah, SUM(jumlah_sampah) as total_weight')
             ->groupBy('jenis_sampah')
             ->orderByDesc('total_weight')
-            ->limit(4)
+            // ->limit(4)
             ->get();
 
-        // If we have less than 4 types with data, fill with other active types
-        if ($topByWeight->count() < 4) {
+        // If we have less than 6 types with data, fill with other active types
+        if ($topByWeight->count() < 12) {
             $usedTypes = $topByWeight->pluck('jenis_sampah')->toArray();
             $remainingTypes = array_diff($allActiveTypes, $usedTypes);
 
             // Add remaining types with zero weight
             foreach ($remainingTypes as $type) {
-                if ($topByWeight->count() >= 4) break;
+                if ($topByWeight->count() >= 12) break;
                 $topByWeight->push((object)[
                     'jenis_sampah' => $type,
                     'total_weight' => 0
