@@ -334,6 +334,7 @@
                         x: {
                             beginAtZero: true,
                             ticks: {
+                                min: 0,
                                 stepSize: 1
                             }
                         },
