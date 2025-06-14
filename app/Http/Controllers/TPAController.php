@@ -25,7 +25,7 @@ class TPAController extends Controller
                 $query->select('kriterias.id', 'label', 'nama', 'satuan_ukur');
                 // ->whereNotIn('nama', ['biaya', 'tingkat_kemacetan']);
             }
-        ])->orderBy('tpa.id', 'asc')->get(['tpa.id', 'tpa.nama', 'alamat', 'kontak']);
+        ])->orderBy('tpa.id', 'asc')->get(['tpa.id', 'tpa.nama', 'alamat']);
         $allJenisSampah = JenisSampah::all(['id', 'nama']);
         $kriterias = Kriteria::get(['id', 'label', 'nama', 'satuan_ukur']);
         // ->whereNotIn('nama', ['biaya', 'tingkat_kemacetan']);
@@ -38,7 +38,6 @@ class TPAController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string',
-            'kontak' => 'nullable|string|max:255',
             'jenis_sampah' => 'array',
             'jenis_sampah.*' => 'integer|exists:jenis_sampah,id',
             'is_active' => 'boolean',
@@ -50,7 +49,6 @@ class TPAController extends Controller
             $tpa = TPA::create([
                 'nama' => $request->nama,
                 'alamat' => $request->alamat,
-                'kontak' => $request->kontak,
                 'is_active' => $request->is_active ?? true
             ]);
 
@@ -90,7 +88,6 @@ class TPAController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string',
-            'kontak' => 'nullable|string|max:255',
             'jenis_sampah' => 'array',
             'jenis_sampah.*' => 'integer|exists:jenis_sampah,id',
             'is_active' => 'boolean',
@@ -102,7 +99,6 @@ class TPAController extends Controller
             $tpa->update([
                 'nama' => $request->nama,
                 'alamat' => $request->alamat,
-                'kontak' => $request->kontak,
                 'is_active' => $request->is_active ?? true
             ]);
 

@@ -78,10 +78,6 @@
                                 <div class="font-weight-bold">Alamat:</div>
                                 <div>${hasil.view.alamat}</div>
                             </div>
-                            <div class=" mb-2">
-                                <div class="font-weight-bold">Kontak:</div>
-                                <div>${hasil.view.kontak}</div>
-                            </div>
                         </div>
                         <div class="col-md-6">
                             <div class=" mb-2">

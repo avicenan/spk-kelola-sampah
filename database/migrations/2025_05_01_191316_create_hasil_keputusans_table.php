@@ -18,7 +18,6 @@ return new class extends Migration
             $table->float('skor');
             $table->string('nama');
             $table->text('alamat');
-            $table->string('kontak');
             $table->string('jenis_sampah');
             $table->string('sumber_sampah');
             $table->date('from');

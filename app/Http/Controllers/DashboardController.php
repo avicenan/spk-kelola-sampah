@@ -47,7 +47,7 @@ class DashboardController extends Controller
         return $result;
     }
 
-    public function topFourJenisSampah()
+    public function topJenisSampah()
     {
         // Get all active waste types
         $allActiveTypes = JenisSampah::where('is_active', true)->pluck('nama')->toArray();
@@ -132,7 +132,7 @@ class DashboardController extends Controller
     {
         $fiveDaysSampah = json_decode($this->fivedayssampah()->getContent(), true);
         $countKeputusan = $this->countKeputusan();
-        $topFourJenisSampah = $this->topFourJenisSampah();
+        $topJenisSampah = $this->topJenisSampah();
         $topTPA = $this->topTPA();
         $latestKeputusan = $this->latestKeputusan();
         $countTPA = TPA::count();
@@ -140,6 +140,6 @@ class DashboardController extends Controller
         // return dd($latestKeputusan);
 
         // return dd($topFourJenisSampah);
-        return view('dashboard', compact('fiveDaysSampah', 'countKeputusan', 'topFourJenisSampah', 'topTPA', 'latestKeputusan', 'countTPA', 'countJenisSampah'));
+        return view('dashboard', compact('fiveDaysSampah', 'countKeputusan', 'topJenisSampah', 'topTPA', 'latestKeputusan', 'countTPA', 'countJenisSampah'));
     }
 }

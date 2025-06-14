@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tpa_id')->constrained('tpa')->onDelete('cascade');
             $table->foreignId('kriteria_id')->constrained('kriterias')->onDelete('cascade');
-            $table->decimal('nilai', 8, 2)->default(0);
+            $table->decimal('nilai', 15, 2)->default(0);
             $table->timestamps();
         });
     }

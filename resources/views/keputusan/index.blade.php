@@ -33,6 +33,11 @@
     @include('keputusan.script')
     <script>
         $(document).ready(function() {
+            // Update 'to' date minimum when 'from' date changes
+            // $('input[name="from"]').on('change.datetimepicker', function(e) {
+            //     $('input[name="to"]').data("datetimepicker").minDate(e.date);
+            // });
+
             $('#calculate').click(function() {
                 // Get form data
                 var formData = new FormData($('#keputusanForm')[0]);
@@ -60,7 +65,6 @@
                                         <td>${item.view.rank}</td>
                                         <td>${item.view.nama}</td>
                                         <td>${item.view.alamat}</td>
-                                        <td>${item.view.kontak}</td>
                                         <td>${item.view.jenis_sampah}</td>
                                         <td>${item.view.jumlah_sampah} kg</td>
                                         <td>${item.skor}%</td>
@@ -82,6 +86,13 @@
                         });
                     }
                 });
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
+            $('input[name="from"]').on('change.datetimepicker', function(e) {
+                $('input[name="to"]').data("datetimepicker").minDate(e.date);
             });
         });
     </script>
@@ -183,10 +194,10 @@
                                 @php
                                     $inputDateConfig = [
                                         'format' => 'DD-MM-YYYY',
-                                        'minDate' => 'js:moment().startOf("day")',
                                     ];
                                 @endphp
-                                <x-adminlte-input-date name="from" :config="$inputDateConfig" placeholder="Pilih tanggal awal...">
+                                <x-adminlte-input-date id="from" name="from" :config="$inputDateConfig"
+                                    placeholder="Pilih tanggal awal...">
                                     <x-slot name="appendSlot">
                                         <div class="input-group-text bg-secondary">
                                             <i class="fas fa-calendar-alt"></i>

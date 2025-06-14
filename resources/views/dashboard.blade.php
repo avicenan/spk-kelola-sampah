@@ -136,7 +136,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <div class="row">
                                     <div class="col-12">
                                         <div class="card">
@@ -152,28 +152,31 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="row">
-                                    @foreach ($topFourJenisSampah as $item)
-                                        <div class="col-md-6">
-                                            <div class="card border mb-4">
-                                                <div class="card-body">
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <div>
-                                                            <h6 class="mb-0 text-truncate" style="max-width: 150px;">
-                                                                {{ $item->jenis_sampah }}
-                                                            </h6>
-                                                            <h2 class="mb-0 text-lg">{{ $item->total_weight }} kg</h2>
-                                                            <small>Total Berat</small>
-                                                        </div>
-                                                        <i class="fas fa-trash fa-lg text-success"></i>
-                                                    </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="row">
+                            @foreach ($topJenisSampah as $item)
+                                <div class="col-md-2">
+                                    <div class="card border mb-4">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-0 text-truncate" style="max-width: 150px;">
+                                                        {{ $item->jenis_sampah }}
+                                                    </h6>
+                                                    <h2 class="mb-0 text-lg">{{ $item->total_weight }} kg</h2>
+                                                    <small>Total Berat</small>
                                                 </div>
+                                                <i class="fas fa-trash fa-lg text-success"></i>
                                             </div>
                                         </div>
-                                    @endforeach
+                                    </div>
                                 </div>
-                            </div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -183,7 +186,7 @@
                     <div class="col-12">
                         <div class="card border">
                             <div class="card-header">
-                                <h3 class="card-title">Top TPA Berdasarkan Jumlah Terpilih</h3>
+                                <h3 class="card-title">TPA Berdasarkan Jumlah Terpilih</h3>
                             </div>
                             <div class="card-body">
                                 <div style="position: relative; height: 300px;">
@@ -255,7 +258,7 @@
 
             // Pie Chart
             var pieCtx = document.getElementById('pieChart').getContext('2d');
-            var pieData = @json($topFourJenisSampah);
+            var pieData = @json($topJenisSampah);
 
             var pieChart = new Chart(pieCtx, {
                 type: 'pie',
@@ -312,7 +315,7 @@
             var tpaData = @json($topTPA);
 
             var tpaChart = new Chart(tpaCtx, {
-                type: 'bar',
+                type: 'horizontalBar',
                 data: {
                     labels: tpaData.map(item => item.nama),
                     datasets: [{
@@ -326,16 +329,15 @@
                     }]
                 },
                 options: {
-                    responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: {
+                        x: {
                             beginAtZero: true,
                             ticks: {
                                 stepSize: 1
                             }
                         },
-                        x: {
+                        y: {
                             grid: {
                                 display: false
                             }

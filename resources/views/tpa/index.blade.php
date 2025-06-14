@@ -16,12 +16,11 @@
         ['label' => 'ID', 'width' => 4],
         ['label' => 'Nama TPA', 'width' => 10],
         ['label' => 'Alamat', 'width' => 10],
-        ['label' => 'Kontak', 'width' => 10],
         ['label' => 'Jenis Sampah', 'width' => 25],
         ['label' => 'Actions', 'no-export' => true, 'width' => 5],
     ];
 
-    array_splice($heads, 5, 0, $kriteriasHeads);
+    array_splice($heads, 4, 0, $kriteriasHeads);
 
     $config = [
         'data' => array_map(function ($v) {
@@ -56,9 +55,6 @@
                     '"
                         data-alamat="' .
                     $v['alamat'] .
-                    '"
-                        data-kontak="' .
-                    $v['kontak'] .
                     '"
                         data-jenis-sampah=\'' .
                     json_encode($originalData['jenis_sampah']) .
@@ -246,11 +242,6 @@
                     <textarea name="alamat" id="alamat" class="form-control" placeholder="Masukkan alamat lengkap lokasi dari TPA/TPS."></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="kontak">Kontak</label>
-                    <input type="tel" class="form-control" id="kontak" name="kontak"
-                        placeholder="Masukkan nomor telepon yang bisa dihubungi.">
-                </div>
-                <div class="form-group">
                     <label for="jenis_sampah">Jenis Sampah</label>
                     <div id="createJenisSampahList">
                         <div class="input-group mb-2 jenis-sampah-row">
@@ -333,11 +324,6 @@
                     <label for="alamat">Alamat</label>
                     <textarea name="alamat" id="editTPAAlamat" class="form-control"
                         placeholder="Masukkan alamat lengkap lokasi dari TPA/TPS."></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="kontak">Kontak</label>
-                    <input type="tel" class="form-control" id="editTPAKontak" name="kontak"
-                        placeholder="Masukkan nomor telepon yang bisa dihubungi.">
                 </div>
                 <div class="form-group">
                     <label for="jenis_sampah">Jenis Sampah</label>
@@ -429,7 +415,6 @@
                 var id = button.data('id');
                 var nama = button.data('nama');
                 var alamat = button.data('alamat');
-                var kontak = button.data('kontak');
                 var jenisSampah = button.data('jenis-sampah');
                 var kriterias = button.data('kriterias');
 
@@ -437,7 +422,6 @@
                 form.attr('action', '/tpa/' + id);
                 $('#editTPANama').val(nama);
                 $('#editTPAAlamat').val(alamat);
-                $('#editTPAKontak').val(kontak);
 
                 // Load jenis sampah
                 var jenisSampahHtml = '';
