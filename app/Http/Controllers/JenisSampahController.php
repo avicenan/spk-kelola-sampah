@@ -17,7 +17,7 @@ class JenisSampahController extends Controller
 
     public function index()
     {
-        $jenisSampah = JenisSampah::orderBy('id', 'asc')->get(['id', 'nama', 'sumber_sampah']);
+        $jenisSampah = JenisSampah::orderBy('id', 'asc')->get(['id', 'nama', 'sumber_sampah', 'contoh_sampah']);
         return view('jenis-sampah.index', compact('jenisSampah'));
     }
 
@@ -26,6 +26,7 @@ class JenisSampahController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255|unique:jenis_sampah,nama',
             'sumber_sampah' => 'nullable|string',
+            'contoh_sampah' => 'nullable|string',
             'is_active' => 'boolean'
         ]);
 
@@ -33,6 +34,7 @@ class JenisSampahController extends Controller
             $jenisSampah = JenisSampah::create([
                 'nama' => $request->nama,
                 'sumber_sampah' => $request->sumber_sampah,
+                'contoh_sampah' => $request->contoh_sampah,
                 'is_active' => $request->is_active ?? true
             ]);
         } catch (\Exception $e) {
@@ -57,6 +59,7 @@ class JenisSampahController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255|unique:jenis_sampah,nama,' . $jenisSampah->id,
             'sumber_sampah' => 'nullable|string',
+            'contoh_sampah' => 'nullable|string',
             'is_active' => 'boolean'
         ]);
 
@@ -64,6 +67,7 @@ class JenisSampahController extends Controller
             $jenisSampah->update([
                 'nama' => $request->nama,
                 'sumber_sampah' => $request->sumber_sampah,
+                'contoh_sampah' => $request->contoh_sampah,
                 'is_active' => $request->is_active ?? true
             ]);
         } catch (\Exception $e) {

@@ -7,7 +7,7 @@
 
 @php
 
-    $heads = ['id', 'Nama Jenis', 'Sumber', ['label' => 'Actions', 'no-export' => true, 'width' => 5]];
+    $heads = ['ID', 'Nama Jenis', 'Sumber', 'Contoh', ['label' => 'Actions', 'no-export' => true, 'width' => 5]];
 
     $config = [
         'data' => array_map(function ($v) {
@@ -22,6 +22,8 @@
                     $v['nama'] .
                     '\'); $(\'#editJenisSampahSumber\').val(\'' .
                     $v['sumber_sampah'] .
+                    '\'); $(\'#editJenisSampahContoh\').val(\'' .
+                    $v['contoh_sampah'] .
                     '\');">
                         <i class="fa fa-lg fa-fw fa-pen"></i>
                     </button>
@@ -41,7 +43,7 @@
             return array_values($v);
         }, json_decode($jenisSampah, true)),
         'order' => [[0, 'asc']],
-        'columns' => [null, null, null, null],
+        'columns' => [null, null, null, null, null],
     ];
 @endphp
 
@@ -168,6 +170,10 @@
                     <textarea name="sumber_sampah" id="sumber_sampah" class="form-control"
                         placeholder="Masukkan tempat darimana sampah berasal."></textarea>
                 </div>
+                <div class="form-group">
+                    <label for="contoh_sampah">Contoh</label>
+                    <textarea name="contoh_sampah" id="createJenisSampahContoh" class="form-control" placeholder="Masukkan contoh sampah."></textarea>
+                </div>
                 <x-slot name="footerSlot">
                     <button id="createJenisSampahButton" type="button" class="btn btn-primary"
                         onclick="$('#createJenisSampahForm').submit();">Simpan</button>
@@ -190,6 +196,10 @@
                     <label for="sumber_sampah">Sumber</label>
                     <textarea name="sumber_sampah" id="editJenisSampahSumber" class="form-control"
                         placeholder="Masukkan tempat darimana sampah berasal."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="contoh_sampah">Contoh</label>
+                    <textarea name="contoh_sampah" id="editJenisSampahContoh" class="form-control" placeholder="Masukkan contoh sampah."></textarea>
                 </div>
                 <x-slot name="footerSlot">
                     <button id="editJenisSampahButton" type="button" class="btn btn-primary"

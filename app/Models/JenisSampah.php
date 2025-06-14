@@ -13,6 +13,7 @@ class JenisSampah extends Model
     protected $fillable = [
         'nama',
         'sumber_sampah',
+        'contoh_sampah',
         'is_active'
     ];
 
