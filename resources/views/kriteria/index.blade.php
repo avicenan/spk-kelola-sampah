@@ -9,7 +9,7 @@
 @php
 
     $heads = [
-        ['label' => 'ID', 'width' => 4],
+        ['label' => 'No', 'width' => 4],
         'Nama',
         'Sifat',
         'Bobot',
@@ -19,56 +19,64 @@
     ];
 
     $config = [
-        'data' => array_map(function ($v) {
-            $v['actions'] =
-                '<nobr>
+        'data' => array_map(
+            function ($v, $index) {
+                $v['actions'] =
+                    '<nobr>
                 <button class="btn btn-xs btn-default text-primary mx-1 shadow" 
                     title="Edit" 
                     data-toggle="modal" 
                     data-target="#editKriteria"
                     onclick="$(\'#editKriteriaForm\').attr(\'action\', \'/kriteria/' .
-                $v['id'] .
-                '\'); 
+                    $v['id'] .
+                    '\'); 
                              $(\'#editKriteriaLabel\').val(\'' .
-                $v['label'] .
-                '\');
+                    $v['label'] .
+                    '\');
                              $(\'#editKriteriaSifat\').val(\'' .
-                $v['sifat'] .
-                '\');
+                    $v['sifat'] .
+                    '\');
                              $(\'#editKriteriaBobot\').val(\'' .
-                $v['bobot'] .
-                '\');
+                    $v['bobot'] .
+                    '\');
                              $(\'#editKriteriaSatuanUkur\').val(\'' .
-                $v['satuan_ukur'] .
-                '\');">
+                    $v['satuan_ukur'] .
+                    '\');">
                     <i class="fa fa-lg fa-fw fa-pen"></i>
                 </button>' .
-                ($v['is_deletable']
-                    ? '<button class="btn btn-xs btn-default text-danger mx-1 shadow"
+                    ($v['is_deletable']
+                        ? '<button class="btn btn-xs btn-default text-danger mx-1 shadow"
                     title="Delete" 
                     data-toggle="modal" 
                     data-target="#deleteKriteria"
                     onclick="$(\'#deleteKriteriaForm\').attr(\'action\', \'/kriteria/' .
-                        $v['id'] .
-                        '\');
+                            $v['id'] .
+                            '\');
                              $(\'#deleteKriteriaLabel\').text(\'' .
-                        $v['label'] .
-                        '\');">
+                            $v['label'] .
+                            '\');">
                     <i class="fa fa-lg fa-fw fa-trash"></i>
                 </button>'
-                    : '<button class="btn btn-xs btn-default text-secondary mx-1 shadow"
+                        : '<button class="btn btn-xs btn-default text-secondary mx-1 shadow"
                     title="Lock" 
                     disabled>
                     <i class="fa fa-lg fa-fw fa-lock"></i>
                 </button>') .
-                '</nobr>';
-            if ($v['sifat'] == 'cost') {
-                $v['sifat'] = '<span class="badge badge-pill badge-warning">Cost</span>';
-            } else {
-                $v['sifat'] = '<span class="badge badge-pill badge-success">Benefit</span>';
-            }
-            return array_values($v);
-        }, json_decode($kriterias, true)),
+                    '</nobr>';
+                if ($v['sifat'] == 'cost') {
+                    $v['sifat'] = '<span class="badge badge-pill badge-warning">Cost</span>';
+                } else {
+                    $v['sifat'] = '<span class="badge badge-pill badge-success">Benefit</span>';
+                }
+
+                // Replace ID with index + 1 for numbering
+                $v['id'] = $index + 1;
+
+                return array_values($v);
+            },
+            json_decode($kriterias, true),
+            array_keys(json_decode($kriterias, true)),
+        ),
         'order' => [[0, 'asc']],
         'columns' => [null, null, null, null, null, ['visible' => false], null],
         'columnDefs' => [

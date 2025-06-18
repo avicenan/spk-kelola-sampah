@@ -13,7 +13,7 @@
         ->toArray();
 
     $heads = [
-        ['label' => 'ID', 'width' => 4],
+        ['label' => 'No', 'width' => 4],
         ['label' => 'Nama TPA', 'width' => 10],
         ['label' => 'Alamat', 'width' => 10],
         ['label' => 'Jenis Sampah', 'width' => 25],
@@ -23,62 +23,69 @@
     array_splice($heads, 4, 0, $kriteriasHeads);
 
     $config = [
-        'data' => array_map(function ($v) {
-            // Store original data for modal
-            $originalData = $v;
+        'data' => array_map(
+            function ($v, $index) {
+                // Store original data for modal
+                $originalData = $v;
 
-            // Process data for table display
-            $v['jenis_sampah'] = implode(', ', array_column($v['jenis_sampah'], 'nama'));
+                // Process data for table display
+                $v['jenis_sampah'] = implode(', ', array_column($v['jenis_sampah'], 'nama'));
 
-            $kriteria_values = array_values(
-                array_map(function ($k) {
-                    return $k['pivot']['nilai'];
-                }, $v['kriterias']),
-            );
+                $kriteria_values = array_values(
+                    array_map(function ($k) {
+                        return $k['pivot']['nilai'];
+                    }, $v['kriterias']),
+                );
 
-            // Remove kriterias after using it
-            unset($v['kriterias']);
+                // Remove kriterias after using it
+                unset($v['kriterias']);
 
-            // Add kriterias values
-            $v = array_merge($v, $kriteria_values);
+                // Add kriterias values
+                $v = array_merge($v, $kriteria_values);
 
-            // Add actions as last column if user is staff
-            if (Auth::user()->role === 'staff') {
-                $v['actions'] =
-                    '<nobr>
+                // Add actions as last column if user is staff
+                if (Auth::user()->role === 'staff') {
+                    $v['actions'] =
+                        '<nobr>
                     <button class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit" data-toggle="modal" data-target="#editTPA" 
                         data-id="' .
-                    $v['id'] .
-                    '"
+                        $v['id'] .
+                        '"
                         data-nama="' .
-                    $v['nama'] .
-                    '"
+                        $v['nama'] .
+                        '"
                         data-alamat="' .
-                    $v['alamat'] .
-                    '"
+                        $v['alamat'] .
+                        '"
                         data-jenis-sampah=\'' .
-                    json_encode($originalData['jenis_sampah']) .
-                    '\'
+                        json_encode($originalData['jenis_sampah']) .
+                        '\'
                         data-kriterias=\'' .
-                    json_encode($originalData['kriterias']) .
-                    '\'
+                        json_encode($originalData['kriterias']) .
+                        '\'
                     >
                         <i class="fa fa-lg fa-fw fa-pen"></i>
                     </button>
                     <button class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete" data-toggle="modal" data-target="#deleteTPA" onclick="$(\'#deleteTPAForm\').attr(\'action\', \'/tpa/' .
-                    $v['id'] .
-                    '\'); $(\'#deleteTPANama\').text(\'' .
-                    $v['nama'] .
-                    '\');">
+                        $v['id'] .
+                        '\'); $(\'#deleteTPANama\').text(\'' .
+                        $v['nama'] .
+                        '\');">
                         <i class="fa fa-lg fa-fw fa-trash"></i>
                     </button>
                 </nobr>';
-            } else {
-                $v['actions'] = '';
-            }
+                } else {
+                    $v['actions'] = '';
+                }
 
-            return array_values($v);
-        }, json_decode($tpas, true)),
+                // Replace ID with index + 1 for numbering
+                $v['id'] = $index + 1;
+
+                return array_values($v);
+            },
+            json_decode($tpas, true),
+            array_keys(json_decode($tpas, true)),
+        ),
         'order' => [[0, 'asc']],
         'columns' => array_fill(0, count($heads), null),
     ];

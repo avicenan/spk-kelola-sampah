@@ -7,41 +7,49 @@
 
 @php
 
-    $heads = ['ID', 'Nama Jenis', 'Sumber', 'Contoh', ['label' => 'Actions', 'no-export' => true, 'width' => 5]];
+    $heads = ['No', 'Nama Jenis', 'Sumber', 'Contoh', ['label' => 'Actions', 'no-export' => true, 'width' => 5]];
 
     $config = [
-        'data' => array_map(function ($v) {
-            if (Auth::user()->role === 'staff') {
-                $v['actions'] =
-                    '<nobr>
+        'data' => array_map(
+            function ($v, $index) {
+                if (Auth::user()->role === 'staff') {
+                    $v['actions'] =
+                        '<nobr>
                     <button class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit" 
                         data-toggle="modal" data-target="#editJenisSampah"
                         onclick="$(\'#editJenisSampahForm\').attr(\'action\', \'/jenis-sampah/' .
-                    $v['id'] .
-                    '\'); $(\'#editJenisSampahNama\').val(\'' .
-                    $v['nama'] .
-                    '\'); $(\'#editJenisSampahSumber\').val(\'' .
-                    $v['sumber_sampah'] .
-                    '\'); $(\'#editJenisSampahContoh\').val(\'' .
-                    $v['contoh_sampah'] .
-                    '\');">
+                        $v['id'] .
+                        '\'); $(\'#editJenisSampahNama\').val(\'' .
+                        $v['nama'] .
+                        '\'); $(\'#editJenisSampahSumber\').val(\'' .
+                        $v['sumber_sampah'] .
+                        '\'); $(\'#editJenisSampahContoh\').val(\'' .
+                        $v['contoh_sampah'] .
+                        '\');">
                         <i class="fa fa-lg fa-fw fa-pen"></i>
                     </button>
                     <button class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete"
                         data-toggle="modal" data-target="#deleteJenisSampah" 
                         onclick="$(\'#deleteJenisSampahForm\').attr(\'action\', \'/jenis-sampah/' .
-                    $v['id'] .
-                    '\'); $(\'#deleteJenisSampahNama\').text(\'' .
-                    $v['nama'] .
-                    '\');">
+                        $v['id'] .
+                        '\'); $(\'#deleteJenisSampahNama\').text(\'' .
+                        $v['nama'] .
+                        '\');">
                         <i class="fa fa-lg fa-fw fa-trash"></i>
                     </button>
                 </nobr>';
-            } else {
-                $v['actions'] = ' ';
-            }
-            return array_values($v);
-        }, json_decode($jenisSampah, true)),
+                } else {
+                    $v['actions'] = ' ';
+                }
+
+                // Replace ID with index + 1 for numbering
+                $v['id'] = $index + 1;
+
+                return array_values($v);
+            },
+            json_decode($jenisSampah, true),
+            array_keys(json_decode($jenisSampah, true)),
+        ),
         'order' => [[0, 'asc']],
         'columns' => [null, null, null, null, null],
     ];
