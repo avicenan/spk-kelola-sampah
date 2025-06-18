@@ -107,7 +107,7 @@ class KeputusanController extends Controller
 
                 $hasil[] = [
                     'alternatif_id' => $altId,
-                    'skor' => round($skor * 100, 2),
+                    'skor' => round($skor, 3),
                 ];
             }
 
