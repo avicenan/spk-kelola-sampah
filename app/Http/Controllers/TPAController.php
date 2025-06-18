@@ -22,12 +22,13 @@ class TPAController extends Controller
         $tpas = TPA::with([
             'jenisSampah:id,nama',
             'kriterias' => function ($query) {
-                $query->select('kriterias.id', 'label', 'nama', 'satuan_ukur');
+                $query->select('kriterias.id', 'label', 'nama', 'satuan_ukur')
+                    ->whereNotIn('nama', ['biaya', 'tingkat_kemacetan']);
                 // ->whereNotIn('nama', ['biaya', 'tingkat_kemacetan']);
             }
         ])->orderBy('tpa.id', 'asc')->get(['tpa.id', 'tpa.nama', 'alamat']);
         $allJenisSampah = JenisSampah::all(['id', 'nama']);
-        $kriterias = Kriteria::get(['id', 'label', 'nama', 'satuan_ukur']);
+        $kriterias = Kriteria::whereNotIn('nama', ['biaya', 'tingkat_kemacetan'])->get(['id', 'label', 'nama', 'satuan_ukur']);
         // ->whereNotIn('nama', ['biaya', 'tingkat_kemacetan']);
         // return dd($tpas[0]->kriterias);
         return view('tpa.index', compact('tpas', 'allJenisSampah', 'kriterias'));
