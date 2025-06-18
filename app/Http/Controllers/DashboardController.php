@@ -54,15 +54,15 @@ class DashboardController extends Controller
 
         // Get top by weight
         $topByWeight = \App\Models\HasilKeputusan::where('rank', 1)
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->selectRaw('jenis_sampah, SUM(jumlah_sampah) as total_weight')
-            ->groupBy('jenis_sampah')
+            ->whereMonth('hasil_keputusans.created_at', now()->month)
+            ->whereYear('hasil_keputusans.created_at', now()->year)
+            ->join('jenis_sampah', 'jenis_sampah.nama', '=', 'hasil_keputusans.jenis_sampah')
+            ->selectRaw('jenis_sampah.nama as jenis_sampah, SUM(hasil_keputusans.jumlah_sampah) as total_weight')
+            ->groupBy('jenis_sampah.nama')
             ->orderByDesc('total_weight')
-            // ->limit(4)
             ->get();
 
-        // If we have less than 6 types with data, fill with other active types
+        // If we have less than 12 types with data, fill with other active types
         if ($topByWeight->count() < 12) {
             $usedTypes = $topByWeight->pluck('jenis_sampah')->toArray();
             $remainingTypes = array_diff($allActiveTypes, $usedTypes);
