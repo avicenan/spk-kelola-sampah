@@ -94,7 +94,43 @@
             $('input[name="from"]').on('change.datetimepicker', function(e) {
                 $('input[name="to"]').data("datetimepicker").minDate(e.date);
             });
+
+            // Disable all TPA inputs by default when page loads
+            $('.tpa-input').prop('disabled', true);
         });
+    </script>
+    <script>
+        function getTpaByJenisSampah(jenisSampahId) {
+            // If no jenis sampah is selected, disable all inputs
+            if (!jenisSampahId) {
+                $('.tpa-input').prop('disabled', true);
+                return;
+            }
+
+            $.ajax({
+                url: '{{ route('keputusan.getTpaByJenisSampah') }}',
+                type: 'GET',
+                data: {
+                    jenis_sampah_id: jenisSampahId
+                },
+                success: function(response) {
+
+                    // First disable all TPA inputs
+                    $('.tpa-input').prop('disabled', true);
+
+                    // Then enable only the TPA inputs from response
+                    response.forEach(function(tpa) {
+                        $(`#tpa_${tpa.id}`).find('input').prop('disabled', false);
+                    });
+
+                },
+                error: function(xhr) {
+                    console.error('Error fetching TPA data:', xhr);
+                    // If there's an error, disable all inputs
+                    $('.tpa-input').prop('disabled', true);
+                }
+            });
+        }
     </script>
 @endsection
 
@@ -170,7 +206,8 @@
                             {{-- Jenis Sampah --}}
                             <div class="form-group col-6 p-0">
                                 <label for="jenis_sampah_id">Jenis Sampah</label>
-                                <select name="jenis_sampah_id" id="" class="form-control">
+                                <select name="jenis_sampah_id" id="jenis_sampah_id" class="form-control"
+                                    onchange="getTpaByJenisSampah(this.value)">
                                     <option selected disabled>--- Pilih Jenis Sampah ---</option>
                                     @foreach ($jenisSampahs as $jenis)
                                         <option value="{{ $jenis->id }}">{{ $jenis->nama }}</option>
@@ -220,7 +257,7 @@
                         <div class="form-group">
                             <label>Daftar TPA dan Kriteria</label>
                             <div class="table-responsive">
-                                <table class="table table-bordered table-striped">
+                                <table class="table table-bordered table-striped" id="tpaTable">
                                     <thead>
                                         <tr>
                                             <th>Nama TPA</th>
@@ -229,16 +266,17 @@
                                             @endforeach
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody id="tpaTableBody">
                                         @foreach ($tpas as $tpa)
-                                            <tr>
+                                            <tr id="tpa_{{ $tpa->id }}">
                                                 <td>{{ $tpa->nama }}</td>
                                                 @foreach ($kriterias as $kriteria)
                                                     <td>
-                                                        <input type="number" class="form-control form-control-sm"
+                                                        <input id="tpa_kriteria_{{ $tpa->id }}_{{ $kriteria->id }}"
+                                                            type="number" class="form-control form-control-sm tpa-input"
                                                             name="tpa_kriteria[{{ $tpa->id }}][{{ $kriteria->id }}]"
                                                             value="{{ $tpa->kriterias->where('id', $kriteria->id)->first()->pivot->nilai ?? 0 }}"
-                                                            step="0.01" min="0">
+                                                            step="0.01" min="0" disabled>
                                                     </td>
                                                 @endforeach
                                             </tr>

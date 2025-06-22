@@ -38,6 +38,22 @@ class KeputusanController extends Controller
         return view('keputusan.index', compact('keputusans', 'jenisSampahs', 'tpas', 'kriterias'));
     }
 
+    public function getTpaByJenisSampah(Request $request)
+    {
+        try {
+            $jenisSampahId = $request->jenis_sampah_id;
+            $tpas = TPA::whereHas('jenisSampah', function ($query) use ($jenisSampahId) {
+                $query->where('jenis_sampah_id', $jenisSampahId);
+            })->get();
+            return response()->json($tpas);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat mengambil data TPA',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function create()
     {
         return view('keputusan.create');

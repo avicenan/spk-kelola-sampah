@@ -41,9 +41,11 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('tpa', TPAController::class);
 
     // Keputusan
+    Route::get('/keputusan/getTpaByJenisSampah', [KeputusanController::class, 'getTpaByJenisSampah'])->name('keputusan.getTpaByJenisSampah');
     Route::resource('keputusan', KeputusanController::class);
     Route::post('/keputusan/calculate', [KeputusanController::class, 'calculate'])->name('keputusan.calculate');
     Route::get('/keputusan/getHasilKeputusan/{aktivitasId}', [KeputusanController::class, 'getHasilKeputusan'])->name('keputusan.getHasilKeputusan');
+
 
     // Aktifitas
     Route::resource('aktifitas', AktifitasController::class);
