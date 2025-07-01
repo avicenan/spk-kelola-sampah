@@ -109,23 +109,30 @@
                                                 <thead>
                                                     <tr>
                                                         <th>No</th>
-                                                        <th>Tanggal</th>
-                                                        <th>Nama TPA</th>
-                                                        <th>Jenis Sampah</th>
-                                                        <th>Berat (kg)</th>
-                                                        <th>Nama Pegawai</th>
+                                                        <th>Jenis</th>
+                                                        <th>Volume (kg)</th>
+                                                        <th>Keputusan</th>
+                                                        <th>Lokasi Tujuan</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     @foreach ($latestKeputusan as $item)
                                                         <tr>
                                                             <td>{{ $loop->iteration }}</td>
-                                                            <td>{{ $item->created_at->locale('id')->translatedFormat('l, d M Y') }}
-                                                            </td>
-                                                            <td>{{ $item->nama }}</td>
                                                             <td>{{ $item->jenis_sampah }}</td>
                                                             <td>{{ $item->jumlah_sampah }}</td>
-                                                            <td>{{ $item->nama_pengguna }}</td>
+                                                            <td>
+                                                                @if ($item->jenis_sampah === 'Sampah Organik')
+                                                                    Kompos
+                                                                @elseif($item->jenis_sampah === 'Sampah Plastik')
+                                                                    Daur Ulang
+                                                                @elseif($item->jenis_sampah === 'Sampah Food Waste' && $item->jumlah_sampah <= 20)
+                                                                    Donasi
+                                                                @else
+                                                                    TPA
+                                                                @endif
+                                                            </td>
+                                                            <td>{{ $item->nama }}</td>
                                                         </tr>
                                                     @endforeach
                                                 </tbody>
