@@ -70,7 +70,6 @@
             if (aktivitasId === null) {
                 return;
             }
-            console.log('buka modal');
 
             $.ajax({
                 url: "{{ route('keputusan.getHasilKeputusan', ['aktivitasId' => ':aktivitasId']) }}"
@@ -78,7 +77,6 @@
                         ':aktivitasId', aktivitasId),
                 type: 'GET',
                 success: function(response) {
-                    console.log(response);
                     keputusan = response;
                     if (response.length === 0) {
                         $('#keputusanModalContainer').html(`
@@ -100,17 +98,17 @@
                                 </thead>
                                 <tbody id="keputusanModalTableBody">
                                     ${response.map(item => `
-                                                    <tr>
-                                                        <td class="text-center">#${item.rank}</td>
-                                                        <td class="text-center">${item.nama}</td>
-                                                        <td class="text-center">${item.skor}</td>
-                                                        <td class="text-center">
-                                                            <button type="button" class="btn btn-xs btn-default text-primary showDetail" data-toggle="modal" data-target="#resultDetailModal" data-hasil-keputusan-id="${item.id}" onclick="$('#keputusanModal').modal('hide')">
-                                                                <i class="fa fa-lg fa-fw fa-receipt"></i>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                `).join('')}
+                                                            <tr>
+                                                                <td class="text-center">#${item.rank}</td>
+                                                                <td class="text-center">${item.nama}</td>
+                                                                <td class="text-center">${item.skor}</td>
+                                                                <td class="text-center">
+                                                                    <button type="button" class="btn btn-xs btn-default text-primary showDetail" data-toggle="modal" data-target="#resultDetailModal" data-hasil-keputusan-id="${item.id}" onclick="$('#keputusanModal').modal('hide')">
+                                                                        <i class="fa fa-lg fa-fw fa-receipt"></i>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        `).join('')}
                                 </tbody>
                             </table>
                         `);

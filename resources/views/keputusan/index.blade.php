@@ -100,7 +100,7 @@
         });
     </script>
     <script>
-        function getTpaByJenisSampah(jenisSampahId) {
+        function getTpaByJenisSampah(jenisSampahId, jumlahSampah) {
             // If no jenis sampah is selected, disable all inputs
             if (!jenisSampahId) {
                 $('.tpa-input').prop('disabled', true);
@@ -111,7 +111,8 @@
                 url: '{{ route('keputusan.getTpaByJenisSampah') }}',
                 type: 'GET',
                 data: {
-                    jenis_sampah_id: jenisSampahId
+                    jenis_sampah_id: jenisSampahId,
+                    jumlah_sampah: jumlahSampah
                 },
                 success: function(response) {
 
@@ -207,7 +208,7 @@
                             <div class="form-group col-6 p-0">
                                 <label for="jenis_sampah_id">Jenis Sampah</label>
                                 <select name="jenis_sampah_id" id="jenis_sampah_id" class="form-control"
-                                    onchange="getTpaByJenisSampah(this.value)">
+                                    onchange="getTpaByJenisSampah(this.value, $('#jumlah_sampah').val())">
                                     <option selected disabled>--- Pilih Jenis Sampah ---</option>
                                     @foreach ($jenisSampahs as $jenis)
                                         <option value="{{ $jenis->id }}">{{ $jenis->nama }}</option>
@@ -217,16 +218,17 @@
 
                             {{-- Jumlah Sampah --}}
                             <div class="form-group col-6">
-                                <label for="jumlah_sampah">Jumlah Sampah <span class="text-muted font-weight-normal">(dalam
+                                <label for="jumlah_sampah">Volume Sampah <span class="text-muted font-weight-normal">(dalam
                                         kg)</span></label>
                                 <input type="number" class="form-control" id="jumlah_sampah" name="jumlah_sampah"
-                                    placeholder="Masukkan jumlah sampah dalam kg">
+                                    placeholder="Masukkan volume sampah dalam kg"
+                                    onchange="getTpaByJenisSampah($('#jenis_sampah_id').val(), this.value)">
                             </div>
                         </div>
 
-                        {{-- Periode Sampah --}}
+                        {{-- Periode Pengumpulan Sampah --}}
                         <div class="form-group">
-                            <label>Periode Sampah</label>
+                            <label>Periode Pengumpulan Sampah</label>
                             <div class="row m-0">
                                 @php
                                     $inputDateConfig = [

@@ -42,6 +42,17 @@ class KeputusanController extends Controller
     {
         try {
             $jenisSampahId = $request->jenis_sampah_id;
+            $jenisSampah = JenisSampah::find($jenisSampahId);
+
+            // If the selected waste is one of the three categories, return an empty array
+            if (
+                ($jenisSampah && $jenisSampah->nama === 'Sampah Food Waste' && $request->jumlah_sampah <= 20) ||
+                ($jenisSampah && $jenisSampah->nama === 'Sampah Plastik') ||
+                ($jenisSampah && $jenisSampah->nama === 'Sampah Organik')
+            ) {
+                return response()->json([]);
+            }
+
             $tpas = TPA::whereHas('jenisSampah', function ($query) use ($jenisSampahId) {
                 $query->where('jenis_sampah_id', $jenisSampahId);
             })->get();
@@ -61,11 +72,69 @@ class KeputusanController extends Controller
 
     public function calculate(Request $request)
     {
+        // Validate only the basic fields first
         $request->validate([
             'jenis_sampah_id' => 'required|exists:jenis_sampah,id',
             'jumlah_sampah' => 'required|numeric|min:0',
             'from' => 'required|date',
             'to' => 'required|date',
+        ]);
+
+        $jenisSampah = JenisSampah::find($request->jenis_sampah_id);
+        $specialRecommendation = null;
+        if ($jenisSampah) {
+            if ($jenisSampah->nama === 'Sampah Food Waste' && $request->jumlah_sampah <= 20) {
+                $specialRecommendation = [
+                    'recommendation' => 'Donasi ke food bank',
+                    'message' => 'Sampah Food Waste ≤ 20kg sebaiknya didonasikan ke food bank.',
+                    'nama' => 'Food Bank Bandung'
+                ];
+            }
+            if ($jenisSampah->nama === 'Sampah Plastik') {
+                $specialRecommendation = [
+                    'recommendation' => 'Vendor daur ulang sampah',
+                    'message' => 'Sampah Plastik sebaiknya direkomendasikan ke vendor daur ulang sampah.',
+                    'nama' => 'Pusat Daur Ulang Bandung'
+                ];
+            }
+            if ($jenisSampah->nama === 'Sampah Organik') {
+                $specialRecommendation = [
+                    'recommendation' => 'Tempat pengolahan kompos',
+                    'message' => 'Sampah Organik sebaiknya direkomendasikan ke tempat pengolahan kompos.',
+                    'nama' => 'Tempat Pengolahan Kompos'
+                ];
+            }
+        }
+
+        if ($specialRecommendation) {
+            $hasil = [[
+                'alternatif_id' => null,
+                'skor' => 1,
+                'view' => [
+                    'rank' => 1,
+                    'nama' => $specialRecommendation['nama'],
+                    'alamat' => '-',
+                    'jenis_sampah' => $jenisSampah->nama,
+                    'sumber_sampah' => $jenisSampah->sumber_sampah,
+                    'from' => $request->from,
+                    'to' => $request->to,
+                    'jumlah_sampah' => $request->jumlah_sampah,
+                    'nama_pengguna' => Auth::user()->name,
+                    'email_pengguna' => Auth::user()->email,
+                    'role' => Auth::user()->role,
+                    'created_at' => now()
+                ],
+                'normalisasi' => [],
+                'nilaiAlternatif' => [],
+                'kriterias' => [],
+                'is_recommendation' => true,
+                'message' => $specialRecommendation['message']
+            ]];
+            return response()->json($hasil);
+        }
+
+        // Only validate TPA fields if not a special recommendation
+        $request->validate([
             'tpa_kriteria' => 'required|array',
             'tpa_kriteria.*' => 'required|array',
             'tpa_kriteria.*.*' => 'required|numeric|min:0',
@@ -174,23 +243,30 @@ class KeputusanController extends Controller
 
             // Start database transaction
             return DB::transaction(function () use ($hasils, $user) {
+                $first = $hasils[0];
+                $isRecommendation = isset($first['is_recommendation']) && $first['is_recommendation'];
+
                 // Create keputusan
                 $keputusan = Keputusan::create([
                     'user_id' => $user->id,
                     'judul' => $user->name . ' membuat keputusan baru',
-                    'keterangan' => 'Keputusan baru dihasilkan oleh ' . $user->name . ' untuk ' . $hasils[0]['view']['jenis_sampah'] . ' seberat ' . $hasils[0]['view']['jumlah_sampah'] . ' kg. Hasil: ' . $hasils[0]['view']['nama'],
+                    'keterangan' => $isRecommendation
+                        ? 'Rekomendasi khusus: ' . ($first['view']['nama'] ?? '-') . '. ' . ($first['message'] ?? '')
+                        : 'Keputusan baru dihasilkan oleh ' . $user->name . ' untuk ' . $first['view']['jenis_sampah'] . ' seberat ' . $first['view']['jumlah_sampah'] . ' kg. Hasil: ' . $first['view']['nama'],
                 ]);
 
                 // Create hasil keputusan records
-                $hasilKeputusanData = $hasils->map(function ($hasil) use ($keputusan) {
+                $hasilKeputusanData = $hasils->map(function ($hasil) use ($keputusan, $isRecommendation) {
                     // Prepare criteria values
                     $kriteriaValues = [];
-                    foreach ($hasil['kriterias'] as $kriteria) {
-                        $kriteriaValues[$kriteria['nama']] = [
-                            'label' => $kriteria['label'],
-                            'satuan_ukur' => $kriteria['satuan_ukur'],
-                            'nilai' => $hasil['nilaiAlternatif'][$kriteria['nama']]
-                        ];
+                    if (!empty($hasil['kriterias']) && !empty($hasil['nilaiAlternatif'])) {
+                        foreach ($hasil['kriterias'] as $kriteria) {
+                            $kriteriaValues[$kriteria['nama']] = [
+                                'label' => $kriteria['label'],
+                                'satuan_ukur' => $kriteria['satuan_ukur'],
+                                'nilai' => $hasil['nilaiAlternatif'][$kriteria['nama']]
+                            ];
+                        }
                     }
 
                     return [
@@ -210,6 +286,9 @@ class KeputusanController extends Controller
                         'kriterias' => json_encode($kriteriaValues),
                         'created_at' => now(),
                         'updated_at' => now(),
+                        // Optionally store the flag/message if columns exist
+                        // 'is_recommendation' => $isRecommendation,
+                        // 'message' => $hasil['message'] ?? null,
                     ];
                 })->toArray();
 
@@ -221,7 +300,7 @@ class KeputusanController extends Controller
                     'user_id' => $user->id,
                     'keputusan_id' => $keputusan->id,
                     'jenis' => 'add_keputusan',
-                    'deskripsi' => '[' . $user->name . '] membuat keputusan baru untuk ' . $hasils[0]['view']['jenis_sampah'] . ' seberat ' . $hasils[0]['view']['jumlah_sampah'] . ' kg. Hasil: ' . $hasils[0]['view']['nama'],
+                    'deskripsi' => '[' . $user->name . '] membuat keputusan baru untuk ' . $first['view']['jenis_sampah'] . ' seberat ' . $first['view']['jumlah_sampah'] . ' kg. Hasil: ' . $first['view']['nama'],
                 ]);
 
                 return response()->json([
