@@ -7,6 +7,7 @@ use App\Models\Kriteria;
 use App\Models\TPA;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class KriteriaController extends Controller
 {
@@ -119,24 +120,28 @@ class KriteriaController extends Controller
 
     public function destroy(Kriteria $kriterium)
     {
+        // TODO: Uncomment this when want to prevent deleting kriteria
+        // if (!$kriterium->is_deletable) {
+        //     return redirect()->back()->withInput()->with('error', 'Kriteria tidak dapat dihapus.');
+        // }
+
         try {
-            if ($kriterium->is_deletable == false) {
-                return redirect()->back()->withInput()->with('error', 'Kriteria tidak dapat dihapus.');
-            }
+            DB::beginTransaction();
+
             $kriterium->delete();
-        } catch (\Exception $e) {
-            return redirect()->back()->withInput()->with('error', 'Gagal menghapus Kriteria: ' . $e->getMessage());
-        } finally {
-            try {
-                Aktifitas::create([
-                    'user_id' => Auth::user()->id,
-                    'jenis' => 'delete_kriteria',
-                    'deskripsi' => '[' . Auth::user()->name . '] menghapus kriteria ' . $kriterium->label
-                ]);
-            } catch (\Exception $e) {
-                return redirect()->back()->withInput()->with('error', 'Gagal menghapus Kriteria: ' . $e->getMessage());
-            }
+
+            Aktifitas::create([
+                'user_id' => Auth::user()->id,
+                'jenis' => 'delete_kriteria',
+                'deskripsi' => '[' . Auth::user()->name . '] menghapus kriteria ' . $kriterium->label
+            ]);
+
+            DB::commit();
+
             return redirect()->route('kriteria.index')->with('success', 'Kriteria berhasil dihapus');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Gagal menghapus Kriteria: ' . $e->getMessage());
         }
     }
 }

@@ -22,47 +22,61 @@
         'data' => array_map(
             function ($v, $index) {
                 $v['actions'] =
-                    '<nobr>
-                <button class="btn btn-xs btn-default text-primary mx-1 shadow" 
-                    title="Edit" 
-                    data-toggle="modal" 
-                    data-target="#editKriteria"
-                    onclick="$(\'#editKriteriaForm\').attr(\'action\', \'/kriteria/' .
-                    $v['id'] .
-                    '\'); 
-                             $(\'#editKriteriaLabel\').val(\'' .
-                    $v['label'] .
-                    '\');
-                             $(\'#editKriteriaSifat\').val(\'' .
-                    $v['sifat'] .
-                    '\');
-                             $(\'#editKriteriaBobot\').val(\'' .
-                    $v['bobot'] .
-                    '\');
-                             $(\'#editKriteriaSatuanUkur\').val(\'' .
-                    $v['satuan_ukur'] .
-                    '\');">
-                    <i class="fa fa-lg fa-fw fa-pen"></i>
-                </button>' .
-                    ($v['is_deletable']
-                        ? '<button class="btn btn-xs btn-default text-danger mx-1 shadow"
-                    title="Delete" 
-                    data-toggle="modal" 
-                    data-target="#deleteKriteria"
-                    onclick="$(\'#deleteKriteriaForm\').attr(\'action\', \'/kriteria/' .
+                    Auth::user()->role !== 'kepala_divisi'
+                        ? '<button class="btn btn-xs btn-default text-secondary mx-1 shadow" title="Lock" disabled><i class="fa fa-lg fa-fw fa-lock"></i></button>'
+                        : '<nobr>' .
+                            '<button class="btn btn-xs btn-default text-primary mx-1 shadow" 
+                                title="Edit" 
+                                data-toggle="modal" 
+                                data-target="#editKriteria"
+                                onclick="$(\'#editKriteriaForm\').attr(\'action\', \'/kriteria/' .
+                            $v['id'] .
+                            '\'); 
+                                         $(\'#editKriteriaLabel\').val(\'' .
+                            $v['label'] .
+                            '\');
+                                         $(\'#editKriteriaSifat\').val(\'' .
+                            $v['sifat'] .
+                            '\');
+                                         $(\'#editKriteriaBobot\').val(\'' .
+                            $v['bobot'] .
+                            '\');
+                                         $(\'#editKriteriaSatuanUkur\').val(\'' .
+                            $v['satuan_ukur'] .
+                            '\');">
+                                <i class="fa fa-lg fa-fw fa-pen"></i>
+                            </button>' .
+                            //     ($v['is_deletable']
+                            //         ? '<button class="btn btn-xs btn-default text-danger mx-1 shadow"
+                        //     title="Delete"
+                        //     data-toggle="modal"
+                        //     data-target="#deleteKriteria"
+                        //     onclick="$(\'#deleteKriteriaForm\').attr(\'action\', \'/kriteria/' .
+                            //             $v['id'] .
+                            //             '\');
+                        //              $(\'#deleteKriteriaLabel\').text(\'' .
+                            //             $v['label'] .
+                            //             '\');">
+                        //     <i class="fa fa-lg fa-fw fa-trash"></i>
+                        // </button>'
+                            //         : '<button class="btn btn-xs btn-default text-secondary mx-1 shadow"
+                        //     title="Lock"
+                        //     disabled>
+                        //     <i class="fa fa-lg fa-fw fa-lock"></i>
+                        // </button>') .
+                            '<button class="btn btn-xs btn-default text-danger mx-1 shadow"
+                            title="Delete" 
+                            data-toggle="modal" 
+                            data-target="#deleteKriteria"
+                            onclick="$(\'#deleteKriteriaForm\').attr(\'action\', \'/kriteria/' .
                             $v['id'] .
                             '\');
-                             $(\'#deleteKriteriaLabel\').text(\'' .
+                                     $(\'#deleteKriteriaLabel\').text(\'' .
                             $v['label'] .
                             '\');">
-                    <i class="fa fa-lg fa-fw fa-trash"></i>
-                </button>'
-                        : '<button class="btn btn-xs btn-default text-secondary mx-1 shadow"
-                    title="Lock" 
-                    disabled>
-                    <i class="fa fa-lg fa-fw fa-lock"></i>
-                </button>') .
-                    '</nobr>';
+                            <i class="fa fa-lg fa-fw fa-trash"></i>
+                        </button>' .
+                            '</nobr>';
                 if ($v['sifat'] == 'cost') {
                     $v['sifat'] = '<span class="badge badge-pill badge-warning">Cost</span>';
                 } else {
