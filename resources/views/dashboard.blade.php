@@ -42,7 +42,7 @@
                                                 </div>
                                                 <div>
                                                     <h6 class="mb-0">Jumlah form SPK diajukan</h6>
-                                                    <small class="text-muted">Keputusan</small>
+                                                    <small class="text-muted">Keputusan </small>
                                                 </div>
                                             </div>
                                             <i class="fas fa-clipboard-list fa-2x text-primary"></i>
@@ -111,7 +111,7 @@
                                                         <th>No</th>
                                                         <th>Jenis</th>
                                                         <th>Volume (kg)</th>
-                                                        <th>Keputusan</th>
+                                                        <th>Keputusan Awal</th>
                                                         <th>Lokasi Tujuan</th>
                                                     </tr>
                                                 </thead>

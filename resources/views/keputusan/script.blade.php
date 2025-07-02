@@ -164,6 +164,25 @@
         saveButton.prop('disabled', false);
         saveButton.html(`<i
                 class="fa fa-lg fa-fw fa-save"></i>Simpan`);
+
+        // Show/hide recommendation message in modal
+        var jenisSampahText = $('#jenis_sampah_id option:selected').text();
+        if (jenisSampahText === 'Sampah Plastik') {
+            $('#recommendationMessage')
+                .text('Sampah Plastik sebaiknya didaur ulang di vendor daur ulang sampah.')
+                .show();
+        } else if (jenisSampahText === 'Sampah Organik') {
+            $('#recommendationMessage')
+                .text('Sampah Organik sebaiknya diolah menjadi kompos di tempat pengolahan kompos.')
+                .show();
+        } else if (jenisSampahText === 'Sampah Food Waste') {
+            $('#recommendationMessage')
+                .text('Sampah Food Waste <= 20kg akan didonasikan ke food bank.')
+                .show();
+        } else {
+            $('#recommendationMessage').hide().text('');
+        }
+
         const resultHtml = '<table class="table table-bordered">' +
             '<thead>' +
             '<tr>' +

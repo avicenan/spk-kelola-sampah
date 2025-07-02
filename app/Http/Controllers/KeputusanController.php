@@ -46,9 +46,9 @@ class KeputusanController extends Controller
 
             // If the selected waste is one of the three categories, return an empty array
             if (
-                ($jenisSampah && $jenisSampah->nama === 'Sampah Food Waste' && $request->jumlah_sampah <= 20) ||
-                ($jenisSampah && $jenisSampah->nama === 'Sampah Plastik') ||
-                ($jenisSampah && $jenisSampah->nama === 'Sampah Organik')
+                ($jenisSampah && $jenisSampah->nama === 'Sampah Food Waste' && $request->jumlah_sampah <= 20)
+                // ($jenisSampah && $jenisSampah->nama === 'Sampah Plastik') ||
+                // ($jenisSampah && $jenisSampah->nama === 'Sampah Organik')
             ) {
                 return response()->json([]);
             }
@@ -89,48 +89,32 @@ class KeputusanController extends Controller
                     'message' => 'Sampah Food Waste ≤ 20kg sebaiknya didonasikan ke food bank.',
                     'nama' => 'Food Bank Bandung'
                 ];
+                $hasil = [[
+                    'alternatif_id' => null,
+                    'skor' => 1,
+                    'view' => [
+                        'rank' => 1,
+                        'nama' => $specialRecommendation['nama'],
+                        'alamat' => '-',
+                        'jenis_sampah' => $jenisSampah->nama,
+                        'sumber_sampah' => $jenisSampah->sumber_sampah,
+                        'from' => $request->from,
+                        'to' => $request->to,
+                        'jumlah_sampah' => $request->jumlah_sampah,
+                        'nama_pengguna' => Auth::user()->name,
+                        'email_pengguna' => Auth::user()->email,
+                        'role' => Auth::user()->role,
+                        'created_at' => now()
+                    ],
+                    'normalisasi' => [],
+                    'nilaiAlternatif' => [],
+                    'kriterias' => [],
+                    'is_recommendation' => true,
+                    'message' => $specialRecommendation['message']
+                ]];
+                return response()->json($hasil);
             }
-            if ($jenisSampah->nama === 'Sampah Plastik') {
-                $specialRecommendation = [
-                    'recommendation' => 'Vendor daur ulang sampah',
-                    'message' => 'Sampah Plastik sebaiknya direkomendasikan ke vendor daur ulang sampah.',
-                    'nama' => 'Pusat Daur Ulang Bandung'
-                ];
-            }
-            if ($jenisSampah->nama === 'Sampah Organik') {
-                $specialRecommendation = [
-                    'recommendation' => 'Tempat pengolahan kompos',
-                    'message' => 'Sampah Organik sebaiknya direkomendasikan ke tempat pengolahan kompos.',
-                    'nama' => 'Tempat Pengolahan Kompos'
-                ];
-            }
-        }
-
-        if ($specialRecommendation) {
-            $hasil = [[
-                'alternatif_id' => null,
-                'skor' => 1,
-                'view' => [
-                    'rank' => 1,
-                    'nama' => $specialRecommendation['nama'],
-                    'alamat' => '-',
-                    'jenis_sampah' => $jenisSampah->nama,
-                    'sumber_sampah' => $jenisSampah->sumber_sampah,
-                    'from' => $request->from,
-                    'to' => $request->to,
-                    'jumlah_sampah' => $request->jumlah_sampah,
-                    'nama_pengguna' => Auth::user()->name,
-                    'email_pengguna' => Auth::user()->email,
-                    'role' => Auth::user()->role,
-                    'created_at' => now()
-                ],
-                'normalisasi' => [],
-                'nilaiAlternatif' => [],
-                'kriterias' => [],
-                'is_recommendation' => true,
-                'message' => $specialRecommendation['message']
-            ]];
-            return response()->json($hasil);
+            // For Plastik and Organik, do not set a recommendation or message
         }
 
         // Only validate TPA fields if not a special recommendation
@@ -220,8 +204,9 @@ class KeputusanController extends Controller
                 $item['nilaiAlternatif'] = $nilaiAlternatif[$alternatif->id];
                 $item['kriterias'] = $kriterias;
                 return $item;
-            });
+            })->values();
 
+            // For Plastik and Organik, just return the TPA results (no recommendation, no message)
             return response()->json($hasil);
         } catch (\Exception $e) {
             return response()->json([
@@ -240,6 +225,14 @@ class KeputusanController extends Controller
         try {
             $hasils = collect(json_decode($request->data, true));
             $user = Auth::user();
+
+            $first = $hasils[0];
+            $isRecommendation = isset($first['is_recommendation']) && $first['is_recommendation'];
+            $isPlastikOrOrganik = in_array($first['view']['jenis_sampah'], ['Sampah Plastik', 'Sampah Organik']);
+            // Only save the recommendation for Plastik/Organik if present
+            if ($isRecommendation && $isPlastikOrOrganik) {
+                $hasils = collect([$first]);
+            }
 
             // Start database transaction
             return DB::transaction(function () use ($hasils, $user) {
