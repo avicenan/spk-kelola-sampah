@@ -353,9 +353,9 @@ return [
             'icon' => 'fas fa-fw fa-chart-pie mr-2'
         ],
         [
-            'text' => 'Jenis Sampah',
+            'text' => 'Data Sampah',
             'url' => 'jenis-sampah',
-            'icon' => 'fas fa-fw fa-trash-alt mr-2'
+            'icon' => 'fas fa-fw fa-dumpster mr-2'
         ],
         [
             'text' => 'TPS/TPA',
@@ -366,6 +366,11 @@ return [
             'text' => 'Form Keputusan',
             'url' => 'keputusan',
             'icon' => 'fas fa-fw fa-file-alt mr-2'
+        ],
+        [
+            'text' => 'Data Harian Sampah',
+            'url' => 'harian-sampah',
+            'icon' => 'fas fa-fw fa-trash-alt mr-2'
         ],
         ['header' => 'Lainnya'],
         [
@@ -512,7 +517,7 @@ return [
             ],
         ],
         'Chartjs' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',

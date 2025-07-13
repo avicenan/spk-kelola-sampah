@@ -9,6 +9,7 @@ use App\Http\Controllers\KeputusanController;
 use App\Http\Controllers\AktifitasController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KriteriaController;
+use App\Http\Controllers\SampahHarianController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +47,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/keputusan/calculate', [KeputusanController::class, 'calculate'])->name('keputusan.calculate');
     Route::get('/keputusan/getHasilKeputusan/{aktivitasId}', [KeputusanController::class, 'getHasilKeputusan'])->name('keputusan.getHasilKeputusan');
 
+    // Sampah Harian
+    Route::get('/harian-sampah', [SampahHarianController::class, 'index'])->name('harian-sampah.index');
+    Route::post('/harian-sampah', [SampahHarianController::class, 'store'])->name('harian-sampah.store');
+    Route::post('/harian-sampah/bulk', [SampahHarianController::class, 'storeBulk'])->name('harian-sampah.store-bulk');
+    Route::put('/harian-sampah/{id}', [SampahHarianController::class, 'update'])->name('harian-sampah.update');
+    Route::delete('/harian-sampah/{id}', [SampahHarianController::class, 'destroy'])->name('harian-sampah.destroy');
+    Route::get('/harian-sampah/jenis-sampah', [SampahHarianController::class, 'getJenisSampah'])->name('harian-sampah.jenis-sampah');
 
     // Aktifitas
     Route::resource('aktifitas', AktifitasController::class);

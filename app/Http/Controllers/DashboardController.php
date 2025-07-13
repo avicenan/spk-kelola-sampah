@@ -128,6 +128,29 @@ class DashboardController extends Controller
         return $result;
     }
 
+    public function dailyWasteData()
+    {
+        $sevenDaysAgo = now()->subDays(7)->startOfDay();
+
+        $dailyWaste = \App\Models\SampahHarian::where('tanggal_input', '>=', $sevenDaysAgo)
+            ->join('jenis_sampah', 'sampah_harians.jenis_sampah_id', '=', 'jenis_sampah.id')
+            ->selectRaw('sampah_harians.tanggal_input as date, jenis_sampah.nama as jenis_sampah, SUM(sampah_harians.volume_sampah) as total_weight')
+            ->groupBy('sampah_harians.tanggal_input', 'jenis_sampah.nama')
+            ->orderByDesc('sampah_harians.tanggal_input')
+            ->orderBy('jenis_sampah.nama')
+            ->limit(3)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'waktu' => \Carbon\Carbon::parse($item->date)->locale('id')->translatedFormat('d M Y'),
+                    'kategori_sampah' => $item->jenis_sampah,
+                    'volume' => $item->total_weight . ' kg'
+                ];
+            });
+
+        return $dailyWaste;
+    }
+
     public function index()
     {
         $fiveDaysSampah = json_decode($this->fivedayssampah()->getContent(), true);
@@ -135,11 +158,12 @@ class DashboardController extends Controller
         $topJenisSampah = $this->topJenisSampah();
         $topTPA = $this->topTPA();
         $latestKeputusan = $this->latestKeputusan();
+        $dailyWasteData = $this->dailyWasteData();
         $countTPA = TPA::count();
         $countJenisSampah = JenisSampah::count();
         // return dd($latestKeputusan);
 
         // return dd($topFourJenisSampah);
-        return view('dashboard', compact('fiveDaysSampah', 'countKeputusan', 'topJenisSampah', 'topTPA', 'latestKeputusan', 'countTPA', 'countJenisSampah'));
+        return view('dashboard', compact('fiveDaysSampah', 'countKeputusan', 'topJenisSampah', 'topTPA', 'latestKeputusan', 'dailyWasteData', 'countTPA', 'countJenisSampah'));
     }
 }

@@ -19,7 +19,8 @@ class DatabaseSeeder extends Seeder
             AktifitasSeeder::class,
             TPAJenisSampahSeeder::class,
             KriteriaSeeder::class,
-            TPAKriteriaSeeder::class
+            TPAKriteriaSeeder::class,
+            SampahHarianSeeder::class
         ]);
     }
 }

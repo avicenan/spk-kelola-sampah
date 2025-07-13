@@ -17,14 +17,34 @@
                         <div class="row">
                             <div class="col-12">
                                 <div class="card border mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">Sampah Harian Serela Hotel</h5>
+                                    </div>
                                     <div class="card-body">
-                                        <div class="d-flex flex-column">
-                                            <h5 class="card-title">Sampah Serela Hotel</h5>
-                                            <small class="text-muted">7 hari terakhir (dalam kg)</small>
-                                        </div>
-                                        <div style="position: relative; height: 200px;">
-                                            <canvas id="weightChart"></canvas>
-
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Waktu</th>
+                                                        <th>Kategori Sampah</th>
+                                                        <th>Volume</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @forelse ($dailyWasteData as $item)
+                                                        <tr>
+                                                            <td>{{ $item['waktu'] }}</td>
+                                                            <td>{{ $item['kategori_sampah'] }}</td>
+                                                            <td>{{ $item['volume'] }}</td>
+                                                        </tr>
+                                                    @empty
+                                                        <tr>
+                                                            <td colspan="3" class="text-center">Tidak ada data sampah
+                                                                dalam 7 hari terakhir</td>
+                                                        </tr>
+                                                    @endforelse
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -211,58 +231,6 @@
 @section('js')
     <script>
         $(document).ready(function() {
-            // Weight Chart
-            var ctx = document.getElementById('weightChart').getContext('2d');
-            var dates = @json($fiveDaysSampah['dates']);
-            var totals = @json($fiveDaysSampah['totals']);
-
-            var weightChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: dates,
-                    datasets: [{
-                        label: 'Berat Sampah',
-                        data: totals,
-                        backgroundColor: 'rgba(75, 192, 192, 0.8)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1,
-                        borderRadius: 5,
-                        barThickness: 30
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return value + ' kg';
-                                }
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.raw + ' kg';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
             // Pie Chart
             var pieCtx = document.getElementById('pieChart').getContext('2d');
             var pieData = @json($topJenisSampah);

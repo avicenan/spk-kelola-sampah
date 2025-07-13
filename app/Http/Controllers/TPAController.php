@@ -37,13 +37,16 @@ class TPAController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama' => 'required|string|max:255',
+            'nama' => 'required|string|max:255|unique:tpa,nama|not_regex:/food\s*bank/i',
             'alamat' => 'required|string',
             'jenis_sampah' => 'array',
             'jenis_sampah.*' => 'integer|exists:jenis_sampah,id',
             'is_active' => 'boolean',
             'kriterias' => 'required|array',
             'kriterias.*' => 'required|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/'
+        ], [
+            'nama.not_regex' => 'Tidak dapat menambahkan Food Bank',
+            'nama.unique' => 'Nama TPA sudah ada dalam sistem'
         ]);
 
         try {
@@ -68,32 +71,33 @@ class TPAController extends Controller
             } else {
                 $tpa->kriterias()->attach([]);
             }
+
+            // Create activity log
+            Aktifitas::create([
+                'user_id' => Auth::user()->id,
+                'jenis' => 'add_tpa',
+                'deskripsi' => '[' . Auth::user()->name . '] menambahkan TPA ' . $request->nama
+            ]);
+
+            return redirect()->route('tpa.index')->with('success', 'TPA berhasil ditambahkan');
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Gagal menambahkan TPA: ' . $e->getMessage());
-        } finally {
-            try {
-                Aktifitas::create([
-                    'user_id' => Auth::user()->id,
-                    'jenis' => 'add_tpa',
-                    'deskripsi' => '[' . Auth::user()->name . '] menambahkan TPA ' . $request->nama
-                ]);
-            } catch (\Exception $e) {
-                return redirect()->back()->withInput()->with('error', 'Gagal menambahkan TPA: ' . $e->getMessage());
-            }
-            return redirect()->route('tpa.index')->with('success', 'TPA berhasil ditambahkan');
         }
     }
 
     public function update(Request $request, TPA $tpa)
     {
         $request->validate([
-            'nama' => 'required|string|max:255',
+            'nama' => 'required|string|max:255|unique:tpa,nama,' . $tpa->id . '|not_regex:/food\s*bank/i',
             'alamat' => 'required|string',
             'jenis_sampah' => 'array',
             'jenis_sampah.*' => 'integer|exists:jenis_sampah,id',
             'is_active' => 'boolean',
             'kriterias' => 'required|array',
             'kriterias.*' => 'required|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/'
+        ], [
+            'nama.not_regex' => 'Tidak dapat menambahkan Food Bank',
+            'nama.unique' => 'Nama TPA sudah ada dalam sistem'
         ]);
 
         try {
@@ -120,19 +124,17 @@ class TPAController extends Controller
             } else {
                 $tpa->kriterias()->sync([]);
             }
+
+            // Create activity log
+            Aktifitas::create([
+                'user_id' => Auth::user()->id,
+                'jenis' => 'edit_tpa',
+                'deskripsi' => '[' . Auth::user()->name . '] memperbarui TPA ' . $request->nama
+            ]);
+
+            return redirect()->route('tpa.index')->with('success', 'TPA berhasil diperbarui');
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Gagal memperbarui TPA: ' . $e->getMessage());
-        } finally {
-            try {
-                Aktifitas::create([
-                    'user_id' => Auth::user()->id,
-                    'jenis' => 'edit_tpa',
-                    'deskripsi' => '[' . Auth::user()->name . '] memperbarui TPA ' . $request->nama
-                ]);
-            } catch (\Exception $e) {
-                return redirect()->back()->withInput()->with('error', 'Gagal memperbarui TPA: ' . $e->getMessage());
-            }
-            return redirect()->route('tpa.index')->with('success', 'TPA berhasil diperbarui');
         }
     }
 
@@ -140,19 +142,17 @@ class TPAController extends Controller
     {
         try {
             $tpa->delete();
+
+            // Create activity log
+            Aktifitas::create([
+                'user_id' => Auth::user()->id,
+                'jenis' => 'delete_tpa',
+                'deskripsi' => '[' . Auth::user()->name . '] menghapus TPA ' . $tpa->nama
+            ]);
+
+            return redirect()->route('tpa.index')->with('success', 'TPA berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Gagal menghapus TPA: ' . $e->getMessage());
-        } finally {
-            try {
-                Aktifitas::create([
-                    'user_id' => Auth::user()->id,
-                    'jenis' => 'delete_tpa',
-                    'deskripsi' => '[' . Auth::user()->name . '] menghapus TPA ' . $tpa->nama
-                ]);
-            } catch (\Exception $e) {
-                return redirect()->back()->withInput()->with('error', 'Gagal menghapus TPA: ' . $e->getMessage());
-            }
-            return redirect()->route('tpa.index')->with('success', 'TPA berhasil dihapus');
         }
     }
 }
