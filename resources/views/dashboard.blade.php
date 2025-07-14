@@ -26,20 +26,21 @@
                                                 <thead>
                                                     <tr>
                                                         <th>Waktu</th>
-                                                        <th>Kategori Sampah</th>
+                                                        <th>Kategori</th>
                                                         <th>Volume</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     @forelse ($dailyWasteData as $item)
                                                         <tr>
-                                                            <td>{{ $item['waktu'] }}</td>
-                                                            <td>{{ $item['kategori_sampah'] }}</td>
-                                                            <td>{{ $item['volume'] }}</td>
+                                                            <td class="text-sm">{{ $item['waktu'] }}</td>
+                                                            <td class="text-sm">{{ $item['kategori_sampah'] }}</td>
+                                                            <td class="text-sm">{{ $item['volume'] }}</td>
                                                         </tr>
                                                     @empty
                                                         <tr>
-                                                            <td colspan="3" class="text-center">Tidak ada data sampah
+                                                            <td class="small" colspan="3" class="text-center">Tidak ada
+                                                                data sampah
                                                                 dalam 7 hari terakhir</td>
                                                         </tr>
                                                     @endforelse

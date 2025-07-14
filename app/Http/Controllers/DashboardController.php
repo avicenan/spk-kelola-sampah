@@ -142,7 +142,7 @@ class DashboardController extends Controller
             ->get()
             ->map(function ($item) {
                 return [
-                    'waktu' => \Carbon\Carbon::parse($item->date)->locale('id')->translatedFormat('d M Y'),
+                    'waktu' => \Carbon\Carbon::parse($item->date)->locale('id')->translatedFormat('l, d F Y H:i'),
                     'kategori_sampah' => $item->jenis_sampah,
                     'volume' => $item->total_weight . ' kg'
                 ];
