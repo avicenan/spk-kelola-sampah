@@ -17,7 +17,7 @@
         ['label' => 'Nama TPA', 'width' => 10],
         ['label' => 'Alamat', 'width' => 10],
         ['label' => 'Jenis Sampah', 'width' => 25],
-        ['label' => 'Actions', 'no-export' => true, 'width' => 5],
+        ['label' => 'Aksi', 'no-export' => true, 'width' => 5],
     ];
 
     array_splice($heads, 4, 0, $kriteriasHeads);
@@ -45,7 +45,7 @@
 
                 // Add actions as last column if user is staff
                 if (Auth::user()->role === 'staff') {
-                    $v['actions'] =
+                    $v['aksi'] =
                         '<nobr>
                     <button class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit" data-toggle="modal" data-target="#editTPA" 
                         data-id="' .
@@ -97,11 +97,13 @@
         <div class="row py-4">
             <div class="col-12">
                 <h1 class="h3 mb-4 text-gray-800 font-weight-bold">Tempat Pembuangan Akhir (TPA)</h1>
-                <div class="mb-2">
-                    <button class="btn btn-primary" data-toggle="modal" data-target="#createTPA"> <i
-                            class="fa fa-plus mr-2"></i>
-                        Tambah</button>
-                </div>
+                @if (Auth::user()->role === 'staff')
+                    <div class="mb-2">
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#createTPA"> <i
+                                class="fa fa-plus mr-2"></i>
+                            Tambah</button>
+                    </div>
+                @endif
             </div>
 
             @if (session('success'))

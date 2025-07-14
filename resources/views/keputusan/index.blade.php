@@ -198,106 +198,110 @@
         <div class="row py-4">
             <div class="col-12">
                 <h1 class="h3 mb-4 text-gray-800 font-weight-bold">Keputusan</h1>
-                <h2 class="h5 mb-2 text-gray-800 font-weight-bold">Form Keputusan</h2>
-                <form method="POST" action="{{ route('keputusan.calculate') }}" class="p-2 bg-white border mb-4"
-                    id="keputusanForm">
-                    @csrf
-                    <div class="col-12">
-                        <div class="row m-0">
-                            {{-- Jenis Sampah --}}
-                            <div class="form-group col-6 p-0">
-                                <label for="jenis_sampah_id">Jenis Sampah</label>
-                                <select name="jenis_sampah_id" id="jenis_sampah_id" class="form-control"
-                                    onchange="getTpaByJenisSampah(this.value, $('#jumlah_sampah').val())">
-                                    <option selected disabled>--- Pilih Jenis Sampah ---</option>
-                                    @foreach ($jenisSampahs as $jenis)
-                                        <option value="{{ $jenis->id }}">{{ $jenis->nama }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            {{-- Jumlah Sampah --}}
-                            <div class="form-group col-6">
-                                <label for="jumlah_sampah">Volume Sampah <span class="text-muted font-weight-normal">(dalam
-                                        kg)</span></label>
-                                <input type="number" class="form-control" id="jumlah_sampah" name="jumlah_sampah"
-                                    placeholder="Masukkan volume sampah dalam kg"
-                                    onchange="getTpaByJenisSampah($('#jenis_sampah_id').val(), this.value)">
-                            </div>
-                        </div>
-
-                        {{-- Periode Pengumpulan Sampah --}}
-                        <div class="form-group">
-                            <label>Periode Pengumpulan Sampah</label>
+                @if (Auth::user()->role === 'staff')
+                    <h2 class="h5 mb-2 text-gray-800 font-weight-bold">Form Keputusan</h2>
+                    <form method="POST" action="{{ route('keputusan.calculate') }}" class="p-2 bg-white border mb-4"
+                        id="keputusanForm">
+                        @csrf
+                        <div class="col-12">
                             <div class="row m-0">
-                                @php
-                                    $inputDateConfig = [
-                                        'format' => 'DD-MM-YYYY',
-                                    ];
-                                @endphp
-                                <x-adminlte-input-date id="from" name="from" :config="$inputDateConfig"
-                                    placeholder="Pilih tanggal awal...">
-                                    <x-slot name="appendSlot">
-                                        <div class="input-group-text bg-secondary">
-                                            <i class="fas fa-calendar-alt"></i>
-                                        </div>
-                                    </x-slot>
-                                </x-adminlte-input-date>
-                                <span class="m-1 fs-3 fw-bold">-</span>
-                                <x-adminlte-input-date name="to" :config="$inputDateConfig"
-                                    placeholder="Pilih tanggal akhir...">
-                                    <x-slot name="appendSlot">
-                                        <div class="input-group-text bg-secondary">
-                                            <i class="fas fa-calendar-alt"></i>
-                                        </div>
-                                    </x-slot>
-                                </x-adminlte-input-date>
-                            </div>
-                        </div>
+                                {{-- Jenis Sampah --}}
+                                <div class="form-group col-6 p-0">
+                                    <label for="jenis_sampah_id">Jenis Sampah</label>
+                                    <select name="jenis_sampah_id" id="jenis_sampah_id" class="form-control"
+                                        onchange="getTpaByJenisSampah(this.value, $('#jumlah_sampah').val())">
+                                        <option selected disabled>--- Pilih Jenis Sampah ---</option>
+                                        @foreach ($jenisSampahs as $jenis)
+                                            <option value="{{ $jenis->id }}">{{ $jenis->nama }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
 
-                        {{-- TPA Table --}}
-                        <div class="form-group">
-                            <label>Daftar TPA dan Kriteria</label>
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped" id="tpaTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Nama TPA</th>
-                                            @foreach ($kriterias as $kriteria)
-                                                <th>{{ $kriteria->label }} ({{ $kriteria->satuan_ukur }})</th>
-                                            @endforeach
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tpaTableBody">
-                                        @foreach ($tpas as $tpa)
-                                            <tr id="tpa_{{ $tpa->id }}">
-                                                <td>{{ $tpa->nama }}</td>
+                                {{-- Jumlah Sampah --}}
+                                <div class="form-group col-6">
+                                    <label for="jumlah_sampah">Volume Sampah <span
+                                            class="text-muted font-weight-normal">(dalam
+                                            kg)</span></label>
+                                    <input type="number" class="form-control" id="jumlah_sampah" name="jumlah_sampah"
+                                        placeholder="Masukkan volume sampah dalam kg"
+                                        onchange="getTpaByJenisSampah($('#jenis_sampah_id').val(), this.value)">
+                                </div>
+                            </div>
+
+                            {{-- Periode Pengumpulan Sampah --}}
+                            <div class="form-group">
+                                <label>Periode Pengumpulan Sampah</label>
+                                <div class="row m-0">
+                                    @php
+                                        $inputDateConfig = [
+                                            'format' => 'DD-MM-YYYY',
+                                        ];
+                                    @endphp
+                                    <x-adminlte-input-date id="from" name="from" :config="$inputDateConfig"
+                                        placeholder="Pilih tanggal awal...">
+                                        <x-slot name="appendSlot">
+                                            <div class="input-group-text bg-secondary">
+                                                <i class="fas fa-calendar-alt"></i>
+                                            </div>
+                                        </x-slot>
+                                    </x-adminlte-input-date>
+                                    <span class="m-1 fs-3 fw-bold">-</span>
+                                    <x-adminlte-input-date name="to" :config="$inputDateConfig"
+                                        placeholder="Pilih tanggal akhir...">
+                                        <x-slot name="appendSlot">
+                                            <div class="input-group-text bg-secondary">
+                                                <i class="fas fa-calendar-alt"></i>
+                                            </div>
+                                        </x-slot>
+                                    </x-adminlte-input-date>
+                                </div>
+                            </div>
+
+                            {{-- TPA Table --}}
+                            <div class="form-group">
+                                <label>Daftar TPA dan Kriteria</label>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped" id="tpaTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Nama TPA</th>
                                                 @foreach ($kriterias as $kriteria)
-                                                    <td>
-                                                        <input id="tpa_kriteria_{{ $tpa->id }}_{{ $kriteria->id }}"
-                                                            type="number" class="form-control form-control-sm tpa-input"
-                                                            name="tpa_kriteria[{{ $tpa->id }}][{{ $kriteria->id }}]"
-                                                            value="{{ $tpa->kriterias->where('id', $kriteria->id)->first()->pivot->nilai ?? 0 }}"
-                                                            step="0.01" min="0" disabled>
-                                                    </td>
+                                                    <th>{{ $kriteria->label }} ({{ $kriteria->satuan_ukur }})</th>
                                                 @endforeach
                                             </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody id="tpaTableBody">
+                                            @foreach ($tpas as $tpa)
+                                                <tr id="tpa_{{ $tpa->id }}">
+                                                    <td>{{ $tpa->nama }}</td>
+                                                    @foreach ($kriterias as $kriteria)
+                                                        <td>
+                                                            <input
+                                                                id="tpa_kriteria_{{ $tpa->id }}_{{ $kriteria->id }}"
+                                                                type="number"
+                                                                class="form-control form-control-sm tpa-input"
+                                                                name="tpa_kriteria[{{ $tpa->id }}][{{ $kriteria->id }}]"
+                                                                value="{{ $tpa->kriterias->where('id', $kriteria->id)->first()->pivot->nilai ?? 0 }}"
+                                                                step="0.01" min="0" disabled>
+                                                        </td>
+                                                    @endforeach
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
 
-                        {{-- Biaya --}}
-                        {{-- <div class="form-group">
+                            {{-- Biaya --}}
+                            {{-- <div class="form-group">
                             <label for="biaya">Biaya <span class="text-muted font-weight-normal">(dalam
                                     rupiah)</span></label>
                             <input type="number" class="form-control" id="biaya" name="biaya"
                                 placeholder="Masukkan biaya pembuangan dan pengangkutan sampah">
                         </div> --}}
 
-                        {{-- Tingkat Kemacetan --}}
-                        {{-- <div class="form-group">
+                            {{-- Tingkat Kemacetan --}}
+                            {{-- <div class="form-group">
                             <label for="tingkat_kemacetan">Tingkat Kemacetan <span
                                     class="text-muted font-weight-normal">(dari 1 hingga 5)</span></label>
                             <select class="form-control" id="tingkat_kemacetan" name="tingkat_kemacetan">
@@ -310,24 +314,25 @@
                             </select>
                         </div> --}}
 
-                        {{-- Submit Button --}}
-                        <div class="form-group">
-                            <button type="button" id="calculate" data-toggle="modal" data-target="#resultModal"
-                                class="btn btn-primary">Kalkulasi</button>
+                            {{-- Submit Button --}}
+                            <div class="form-group">
+                                <button type="button" id="calculate" data-toggle="modal" data-target="#resultModal"
+                                    class="btn btn-primary">Kalkulasi</button>
+                            </div>
                         </div>
-                    </div>
 
-                    {{-- Result Modal --}}
-                    @include('keputusan.result-modal')
+                        {{-- Result Modal --}}
+                        @include('keputusan.result-modal')
 
-                    {{-- Result Detail Modal --}}
-                    @include('keputusan.result-detail-modal')
+                        {{-- Result Detail Modal --}}
+                        @include('keputusan.result-detail-modal')
 
-                </form>
-                <h2 class="h5 mb-2 text-gray-800 font-weight-bold">Riwayat</h2>
+                    </form>
+                @endif
             </div>
 
             <div class="col-12">
+                <h2 class="h5 mb-2 text-gray-800 font-weight-bold">Riwayat</h2>
                 <x-adminlte-datatable id="table1" :heads="$heads" :config="$config" theme="light" striped hoverable
                     bordered class="border border-black rounded">
                 </x-adminlte-datatable>

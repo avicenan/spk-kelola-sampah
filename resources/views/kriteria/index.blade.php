@@ -15,13 +15,13 @@
         'Bobot',
         'Satuan Ukur',
         'Is Deletable',
-        ['label' => 'Actions', 'no-export' => true, 'width' => 5],
+        ['label' => 'Aksi', 'no-export' => true, 'width' => 5],
     ];
 
     $config = [
         'data' => array_map(
             function ($v, $index) {
-                $v['actions'] =
+                $v['aksi'] =
                     Auth::user()->role !== 'kepala_divisi'
                         ? '<button class="btn btn-xs btn-default text-secondary mx-1 shadow" title="Lock" disabled><i class="fa fa-lg fa-fw fa-lock"></i></button>'
                         : '<nobr>' .

@@ -7,7 +7,7 @@
 
 @php
 
-    $heads = ['No', 'Nama Jenis', 'Sumber', 'Contoh', ['label' => 'Actions', 'no-export' => true, 'width' => 5]];
+    $heads = ['No', 'Nama Jenis', 'Sumber', 'Contoh', ['label' => 'Aksi', 'no-export' => true, 'width' => 5]];
 
     $config = [
         'data' => array_map(
@@ -39,7 +39,7 @@
                     </button>
                 </nobr>';
                 } else {
-                    $v['actions'] = ' ';
+                    $v['aksi'] = ' ';
                 }
 
                 // Replace ID with index + 1 for numbering
@@ -59,13 +59,15 @@
     <div class="container-fluid">
         <div class="row py-4">
             <div class="col-12">
-                <h1 class="h3 mb-4 text-gray-800 font-weight-bold">Jenis Sampah Hotel</h1>
+                <h1 class="h3 mb-4 text-gray-800 font-weight-bold">Data Sampah Hotel</h1>
             </div>
-            <div class="mb-2">
-                <button class="btn btn-primary" data-toggle="modal" data-target="#createJenisSampah"> <i
-                        class="fa fa-plus mr-2"></i>
-                    Tambah</button>
-            </div>
+            @if (Auth::user()->role === 'staff')
+                <div class="mb-2">
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#createJenisSampah"> <i
+                            class="fa fa-plus mr-2"></i>
+                        Tambah</button>
+                </div>
+            @endif
 
             @if (session('success'))
                 @section('js')

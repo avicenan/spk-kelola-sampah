@@ -35,12 +35,15 @@
                         <i class="fas fa-table mr-2"></i>
                         Tabel Data Harian Sampah
                     </h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal">
-                            <i class="fas fa-plus mr-1"></i>
-                            Input Laporan Harian
-                        </button>
-                    </div>
+                    @if (Auth::user()->role === 'staff')
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-primary btn-sm" data-toggle="modal"
+                                data-target="#addModal">
+                                <i class="fas fa-plus mr-1"></i>
+                                Input Laporan Harian
+                            </button>
+                        </div>
+                    @endif
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -53,7 +56,9 @@
                                     <th width="15%">Volume Sampah (kg)</th>
                                     <th width="20%">Sumber Sampah</th>
                                     <th width="15%">Input Oleh</th>
-                                    <th width="10%">Aksi</th>
+                                    @if (Auth::user()->role === 'staff')
+                                        <th width="10%">Aksi</th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
@@ -65,21 +70,23 @@
                                         <td>{{ number_format($data->volume_sampah, 2) }}</td>
                                         <td>{{ $data->sumber_sampah }}</td>
                                         <td>{{ $data->user->name }}</td>
-                                        <td>
-                                            <button type="button" class="btn btn-sm btn-info edit-btn"
-                                                data-id="{{ $data->id }}"
-                                                data-jenis-sampah-id="{{ $data->jenis_sampah_id }}"
-                                                data-volume-sampah="{{ $data->volume_sampah }}"
-                                                data-sumber-sampah="{{ $data->sumber_sampah }}"
-                                                data-tanggal-input="{{ $data->tanggal_input->format('Y-m-d') }}">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-danger delete-btn"
-                                                data-id="{{ $data->id }}"
-                                                data-jenis-sampah="{{ $data->jenisSampah->nama }}">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </td>
+                                        @if (Auth::user()->role === 'staff')
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-info edit-btn"
+                                                    data-id="{{ $data->id }}"
+                                                    data-jenis-sampah-id="{{ $data->jenis_sampah_id }}"
+                                                    data-volume-sampah="{{ $data->volume_sampah }}"
+                                                    data-sumber-sampah="{{ $data->sumber_sampah }}"
+                                                    data-tanggal-input="{{ $data->tanggal_input->format('Y-m-d') }}">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-danger delete-btn"
+                                                    data-id="{{ $data->id }}"
+                                                    data-jenis-sampah="{{ $data->jenisSampah->nama }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        @endif
                                     </tr>
                                 @endforeach
                             </tbody>
