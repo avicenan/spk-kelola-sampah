@@ -370,7 +370,8 @@ return [
         [
             'text' => 'Data Harian Sampah',
             'url' => 'harian-sampah',
-            'icon' => 'fas fa-fw fa-trash-alt mr-2'
+            'icon' => 'fas fa-fw fa-trash-alt mr-2',
+            'active' => ['harian-sampah*']
         ],
         ['header' => 'Lainnya'],
         [

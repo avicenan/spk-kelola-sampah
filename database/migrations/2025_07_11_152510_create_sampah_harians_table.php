@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('jenis_sampah_id')->constrained('jenis_sampah')->onDelete('cascade');
             $table->decimal('volume_sampah', 10, 2); // in kg
             $table->string('sumber_sampah');
-            $table->date('tanggal_input');
+            $table->datetime('tanggal_input');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });

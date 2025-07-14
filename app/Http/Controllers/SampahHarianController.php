@@ -8,6 +8,7 @@ use App\Models\Aktifitas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class SampahHarianController extends Controller
 {
@@ -41,7 +42,18 @@ class SampahHarianController extends Controller
             'jenis_sampah_id' => 'required|exists:jenis_sampah,id',
             'volume_sampah' => 'required|numeric|min:0.01|max:1000',
             'sumber_sampah' => 'required|string|max:255',
-            'tanggal_input' => 'required|date|before_or_equal:today'
+            'tanggal_input' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    if (
+                        !\DateTime::createFromFormat('Y-m-d H:i', $value) &&
+                        !\DateTime::createFromFormat('Y-m-d H:i:s', $value)
+                    ) {
+                        $fail('The ' . $attribute . ' is not a valid datetime.');
+                    }
+                },
+                'before_or_equal:' . now()->format('Y-m-d H:i:s'),
+            ],
         ]);
 
         try {
@@ -49,7 +61,9 @@ class SampahHarianController extends Controller
                 'jenis_sampah_id' => $request->jenis_sampah_id,
                 'volume_sampah' => $request->volume_sampah,
                 'sumber_sampah' => $request->sumber_sampah,
-                'tanggal_input' => $request->tanggal_input,
+                'tanggal_input' => \DateTime::createFromFormat('Y-m-d H:i', $request->tanggal_input)
+                    ? Carbon::createFromFormat('Y-m-d H:i', $request->tanggal_input)
+                    : Carbon::createFromFormat('Y-m-d H:i:s', $request->tanggal_input),
                 'user_id' => Auth::user()->id
             ]);
 
@@ -80,7 +94,18 @@ class SampahHarianController extends Controller
             'bulk_data.*.jenis_sampah_id' => 'required|exists:jenis_sampah,id',
             'bulk_data.*.volume_sampah' => 'required|numeric|min:0.01|max:1000',
             'bulk_data.*.sumber_sampah' => 'required|string|max:255',
-            'tanggal_input' => 'required|date|before_or_equal:today'
+            'tanggal_input' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    if (
+                        !\DateTime::createFromFormat('Y-m-d H:i', $value) &&
+                        !\DateTime::createFromFormat('Y-m-d H:i:s', $value)
+                    ) {
+                        $fail('The ' . $attribute . ' is not a valid datetime.');
+                    }
+                },
+                'before_or_equal:' . now()->format('Y-m-d H:i:s'),
+            ],
         ]);
 
         try {
@@ -95,7 +120,9 @@ class SampahHarianController extends Controller
                     'jenis_sampah_id' => $item['jenis_sampah_id'],
                     'volume_sampah' => $item['volume_sampah'],
                     'sumber_sampah' => $item['sumber_sampah'],
-                    'tanggal_input' => $request->tanggal_input,
+                    'tanggal_input' => \DateTime::createFromFormat('Y-m-d H:i', $request->tanggal_input)
+                        ? Carbon::createFromFormat('Y-m-d H:i', $request->tanggal_input)
+                        : Carbon::createFromFormat('Y-m-d H:i:s', $request->tanggal_input),
                     'user_id' => Auth::user()->id
                 ]);
 
@@ -135,7 +162,18 @@ class SampahHarianController extends Controller
             'jenis_sampah_id' => 'required|exists:jenis_sampah,id',
             'volume_sampah' => 'required|numeric|min:0.01|max:1000',
             'sumber_sampah' => 'required|string|max:255',
-            'tanggal_input' => 'required|date|before_or_equal:today'
+            'tanggal_input' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    if (
+                        !\DateTime::createFromFormat('Y-m-d H:i', $value) &&
+                        !\DateTime::createFromFormat('Y-m-d H:i:s', $value)
+                    ) {
+                        $fail('The ' . $attribute . ' is not a valid datetime.');
+                    }
+                },
+                'before_or_equal:' . now()->format('Y-m-d H:i:s'),
+            ],
         ]);
 
         try {
@@ -147,7 +185,9 @@ class SampahHarianController extends Controller
                 'jenis_sampah_id' => $request->jenis_sampah_id,
                 'volume_sampah' => $request->volume_sampah,
                 'sumber_sampah' => $request->sumber_sampah,
-                'tanggal_input' => $request->tanggal_input
+                'tanggal_input' => \DateTime::createFromFormat('Y-m-d H:i', $request->tanggal_input)
+                    ? Carbon::createFromFormat('Y-m-d H:i', $request->tanggal_input)
+                    : Carbon::createFromFormat('Y-m-d H:i:s', $request->tanggal_input)
             ]);
 
             // Log activity

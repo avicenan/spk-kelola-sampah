@@ -1,6 +1,7 @@
 @extends('adminlte::page')
 
 @section('title', 'Data Harian Sampah')
+@section('plugins.TempusDominusBs4', true)
 
 @section('content_header')
     <h1>Data Harian Sampah</h1>
@@ -59,7 +60,7 @@
                                 @foreach ($sampahHarian as $index => $data)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
-                                        <td>{{ $data->tanggal_input->format('d/m/Y') }}</td>
+                                        <td>{{ $data->tanggal_input->translatedFormat('l, d F Y H:i') }}</td>
                                         <td>{{ $data->jenisSampah->nama }}</td>
                                         <td>{{ number_format($data->volume_sampah, 2) }}</td>
                                         <td>{{ $data->sumber_sampah }}</td>
@@ -102,9 +103,22 @@
                 <form id="addForm">
                     <div class="modal-body">
                         <div class="form-group">
-                            <label for="tanggal_input">Tanggal Input <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="tanggal_input" name="tanggal_input"
-                                value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required>
+                            @php
+                                $config = [
+                                    'format' => 'YYYY-MM-DD HH:mm',
+                                    'maxDate' => 'js:moment()',
+                                ];
+                            @endphp
+                            <x-adminlte-input-date name="tanggal_input" :config="$config"
+                                placeholder="Pilih tanggal dan waktu..." label="Tanggal Input"
+                                value="{{ old('tanggal_input', isset($data) ? $data->tanggal_input->format('Y-m-d H:i') : now()->format('Y-m-d H:i')) }}"
+                                required>
+                                <x-slot name="prependSlot">
+                                    <div class="input-group-text bg-gradient-info">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                </x-slot>
+                            </x-adminlte-input-date>
                         </div>
 
                         <div class="form-group">
@@ -209,8 +223,22 @@
                         </div>
                         <div class="form-group">
                             <label for="edit_tanggal_input">Tanggal Input <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="edit_tanggal_input" name="tanggal_input"
-                                max="{{ date('Y-m-d') }}" required>
+                            @php
+                                $config = [
+                                    'format' => 'YYYY-MM-DD HH:mm',
+                                    'maxDate' => 'js:moment()',
+                                ];
+                            @endphp
+                            <x-adminlte-input-date name="tanggal_input" :config="$config"
+                                placeholder="Pilih tanggal dan waktu..." label="Tanggal Input" label-class="text-primary"
+                                value="{{ old('tanggal_input', isset($data) ? $data->tanggal_input->format('Y-m-d H:i') : now()->format('Y-m-d H:i')) }}"
+                                required>
+                                <x-slot name="prependSlot">
+                                    <div class="input-group-text bg-gradient-info">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                </x-slot>
+                            </x-adminlte-input-date>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -454,40 +482,79 @@
             const labels = chartData.map(item => item.nama);
             const data = chartData.map(item => item.total_volume);
 
+            // Define a color palette for up to 10 categories
+            const colorPalette = [
+                'rgba(255, 99, 132, 0.7)',
+                'rgba(54, 162, 235, 0.7)',
+                'rgba(255, 206, 86, 0.7)',
+                'rgba(75, 192, 192, 0.7)',
+                'rgba(153, 102, 255, 0.7)',
+                'rgba(255, 159, 64, 0.7)',
+                'rgba(199, 199, 199, 0.7)',
+                'rgba(83, 102, 255, 0.7)',
+                'rgba(255, 102, 255, 0.7)',
+                'rgba(102, 255, 204, 0.7)'
+            ];
+            // Assign a color for each bar
+            const barColors = labels.map((_, i) => colorPalette[i % colorPalette.length]);
+
             const ctx = document.getElementById('lineChart').getContext('2d');
             new Chart(ctx, {
-                type: 'line',
+                type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
                         label: 'Volume Sampah (kg)',
                         data: data,
-                        borderColor: 'rgb(75, 192, 192)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        tension: 0.1,
-                        fill: true
+                        backgroundColor: barColors,
+                        borderColor: barColors.map(c => c.replace('0.7', '1')),
+                        borderWidth: 1
                     }]
                 },
                 options: {
+                    indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: {
+                        x: {
                             beginAtZero: true,
-                            ticks: {
-                                stepSize: 10,
-                                max: Math.max(...data) > 150 ? 200 : 150
+                            title: {
+                                display: true,
+                                text: 'Volume Sampah (kg)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Kategori Sampah'
                             }
                         }
                     },
                     plugins: {
                         legend: {
-                            display: true,
-                            position: 'top'
+                            display: false // Hide default legend for dataset
+                        },
+                        tooltip: {
+                            enabled: true
                         }
                     }
                 }
             });
+
+            // Custom legend for each category
+            const legendContainer = document.getElementById('customLegend');
+            if (legendContainer) legendContainer.remove();
+            const chartCard = document.querySelector('#lineChart').closest('.card-body');
+            const legendDiv = document.createElement('div');
+            legendDiv.id = 'customLegend';
+            legendDiv.style.marginTop = '20px';
+            legendDiv.innerHTML = labels.map((label, i) =>
+                `<span style="display:inline-block;margin-right:20px;vertical-align:middle;">
+                    <span style="display:inline-block;width:16px;height:16px;background:${barColors[i]};margin-right:6px;border-radius:3px;"></span>
+                    <span style="vertical-align:middle;">${label}</span>
+                </span>`
+            ).join('');
+            chartCard.appendChild(legendDiv);
         }
 
         function addData() {
